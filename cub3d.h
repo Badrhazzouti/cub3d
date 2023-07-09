@@ -6,7 +6,7 @@
 /*   By: bhazzout <bhazzout@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/08 22:12:42 by bhazzout          #+#    #+#             */
-/*   Updated: 2023/07/09 01:05:35 by bhazzout         ###   ########.fr       */
+/*   Updated: 2023/07/09 16:43:21 by bhazzout         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,13 @@
 # ifndef BUFFER_SIZE
 #  define BUFFER_SIZE 10
 # endif
+
+typedef struct s_win
+{
+	int cell_size;
+	int	map_width;
+	int	map_height;
+} t_win;
 
 char	*get_next_line(int fd);
 
