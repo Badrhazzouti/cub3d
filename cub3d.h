@@ -6,7 +6,7 @@
 /*   By: bhazzout <bhazzout@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/08 22:12:42 by bhazzout          #+#    #+#             */
-/*   Updated: 2023/07/09 16:43:21 by bhazzout         ###   ########.fr       */
+/*   Updated: 2023/07/10 02:31:15 by bhazzout         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <math.h>
 
 # ifndef BUFFER_SIZE
 #  define BUFFER_SIZE 10
@@ -26,6 +27,12 @@
 
 typedef struct s_win
 {
+	char	**map;
+	void	*mlx_ptr;
+	void	*win_ptr;
+	int	playerX;
+	int	playerY;
+	int	playerA;
 	int cell_size;
 	int	map_width;
 	int	map_height;
