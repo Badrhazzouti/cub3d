@@ -6,7 +6,7 @@
 /*   By: bhazzout <bhazzout@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/08 22:12:42 by bhazzout          #+#    #+#             */
-/*   Updated: 2023/07/11 03:25:32 by bhazzout         ###   ########.fr       */
+/*   Updated: 2023/07/12 03:36:29 by bhazzout         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@
 
 typedef struct s_win
 {
+	char		*f_map;
 	char		**map;
 	void		*mlx_ptr;
 	void		*win_ptr;
@@ -36,6 +37,7 @@ typedef struct s_win
 	float		playerDY;
 	float		playerA;
 	float		fov_A;
+	float		rays_A;
 	int			num_rays;
 	int			cell_size;
 	int			map_width;
@@ -50,5 +52,6 @@ char	*ft_strchr(const char *s, int c);
 char	*ft_strdup(char *s1);
 char	**map_getter(void);
 void	map_printer(char **map);
+char	*one_map(void);
 
 #endif
