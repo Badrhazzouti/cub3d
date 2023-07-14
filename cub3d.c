@@ -6,7 +6,7 @@
 /*   By: bhazzout <bhazzout@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/08 22:12:33 by bhazzout          #+#    #+#             */
-/*   Updated: 2023/07/13 05:14:44 by bhazzout         ###   ########.fr       */
+/*   Updated: 2023/07/14 01:29:21 by bhazzout         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -146,6 +146,8 @@ void mlx_draw_line(void *mlx_ptr, void *win_ptr, int x1, int y1, int x2, int y2,
 
     while (1)
     {
+		if (win->map[(int)(y1 / win->cell_size)][(int)(x1 / win->cell_size)] == '1')
+			break;
         mlx_pixel_put(mlx_ptr, win_ptr, x1, y1, color);
 		// printf("(%d)====(%d)\n", (y1 / win->cell_size), (x1 / win->cell_size));
         if ((x1 == x2 && y1 == y2))
@@ -167,25 +169,18 @@ void mlx_draw_line(void *mlx_ptr, void *win_ptr, int x1, int y1, int x2, int y2,
     }
 }
 
-// void rays_cast(t_win *win, void *mlx_ptr, void *win_ptr)
-// {
-// 	(void)mlx_ptr, (void)win_ptr;
-// 	float	ray_a;
-
-// 	ray_a = win->fov_A / win->num_rays;
-// 	(void)win;
-// }
-
 void	player_render(t_win *win, void *win_ptr, void *mlx_ptr)
 {
 	mlx_pixel_put(mlx_ptr, win_ptr, win->playerX, win->playerY, 0xFF0000);
     float lineLength = 10000.0f;  // Length of the line to be drawn
     float endX = win->playerX + lineLength * cos(win->playerA);
     float endY = win->playerY + lineLength * sin(win->playerA);
-    mlx_draw_line(mlx_ptr, win_ptr, win->playerX, win->playerY, endX, endY, 0x0000FF, win);
+    // mlx_draw_line(mlx_ptr, win_ptr, win->playerX, win->playerY, endX, endY, 0x0000FF, win);
 	// float ray_a = win->fov_A / win->num_rays;
 	for (int col = 0; col < win->num_rays; col++)
 	{
+		
+		mlx_draw_line(mlx_ptr, win_ptr, win->playerX, win->playerY, endX, endY, 0x0000FF, win);
 		float rayX = win->playerX;
 		float rayY = win->playerY;
 		float distancetowall = 0;
@@ -194,17 +189,18 @@ void	player_render(t_win *win, void *win_ptr, void *mlx_ptr)
 		{
 			rayX += cos(win->playerA);
 			rayY += sin(win->playerA);
-			int mapx = (int)(rayX / ((float)win->map_width * WIN_WIDTH));
-			int mapy = (int)(rayY / ((float)win->map_height * WIN_HEIGHT));
-			if (mapx >= 0 && mapx < win->map_width && mapy >= 0 && mapy < win->map_height && win->map[mapy][mapx] == 1)
-            {
+			// int mapx = (int)(rayX / (win->cell_size));
+			// int mapy = (int)(rayY / (win->cell_size));
+			// printf("(%d)(%d)\n", mapx, mapy);
+			// if (mapx >= 0 && mapx < win->map_width && mapy >= 0 && mapy < win->map_height && win->map[mapy][mapx] == 1)
+            // {
+            // 	printf("Column: %d, Distance: %.2f\n", col, distancetowall);
                 distancetowall = sqrt(pow(win->playerX - rayX, 2) + pow(win->playerY- rayY, 2));
-                hitwall = 1;
+                // hitwall = 1;
 
-                printf("Column: %d, Distance: %.2f\n", col, distancetowall);
                 // Draw the wall column based on distanceToWall
 				mlx_draw_line(mlx_ptr, win_ptr, win->playerX, win->playerY, endX, endY, 0x0000FF, win);
-            }
+            // }
 
 			distancetowall += 1.0f;
 		}
@@ -255,8 +251,8 @@ int main (int ac, char **av)
 	win.cell_size = 20;
 	win.map_height = 11;
 	win.map_width = 25;
-	win.playerX = 100;
-	win.playerY = 100;
+	win.playerX = 3.0 * win.cell_size;
+	win.playerY = 4.0 * win.cell_size;
 	win.playerA = 0;
 	win.fov_A = 60;
 	win.rays_A = WIN_WIDTH;

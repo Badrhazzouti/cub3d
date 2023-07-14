@@ -6,7 +6,7 @@
 /*   By: bhazzout <bhazzout@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/08 22:12:42 by bhazzout          #+#    #+#             */
-/*   Updated: 2023/07/13 00:44:33 by bhazzout         ###   ########.fr       */
+/*   Updated: 2023/07/13 23:06:53 by bhazzout         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,8 +34,8 @@ typedef struct s_win
 	char		**map;
 	void		*mlx_ptr;
 	void		*win_ptr;
-	float		playerX;
-	float		playerY;
+	double		playerX;
+	double		playerY;
 	float		playerDX;
 	float		playerDY;
 	float		playerA;
