@@ -6,7 +6,7 @@
 /*   By: bhazzout <bhazzout@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/08 22:12:42 by bhazzout          #+#    #+#             */
-/*   Updated: 2023/07/13 23:06:53 by bhazzout         ###   ########.fr       */
+/*   Updated: 2023/07/14 05:58:11 by bhazzout         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,11 +36,11 @@ typedef struct s_win
 	void		*win_ptr;
 	double		playerX;
 	double		playerY;
-	float		playerDX;
-	float		playerDY;
-	float		playerA;
-	float		fov_A;
-	float		rays_A;
+	double		playerDX;
+	double		playerDY;
+	double		playerA;
+	double		fov_A;
+	double		rays_A;
 	int			num_rays;
 	int			cell_size;
 	int			map_width;

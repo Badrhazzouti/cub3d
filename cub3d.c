@@ -6,7 +6,7 @@
 /*   By: bhazzout <bhazzout@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/08 22:12:33 by bhazzout          #+#    #+#             */
-/*   Updated: 2023/07/14 02:59:27 by bhazzout         ###   ########.fr       */
+/*   Updated: 2023/07/14 05:58:22 by bhazzout         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,14 +95,14 @@ void	p_update(t_win *win)
 {
 	if (move_up == 0)
 	{
-		win->playerX -= win->playerDX;
-		win->playerY -= win->playerDY;
+		win->playerX += win->playerDX;
+		win->playerY += win->playerDY;
 		move_up = 1;
 	}
 	if (move_down == 0)
 	{
-		win->playerX += win->playerDX;
-		win->playerY += win->playerDY;
+		win->playerX -= win->playerDX;
+		win->playerY -= win->playerDY;
 		move_down = 1;
 	}
 	if (rotate_left == 0)
@@ -125,7 +125,7 @@ void	p_update(t_win *win)
 	}
 }
 
-void mlx_draw_line(void *mlx_ptr, void *win_ptr, int x1, int y1, int x2, int y2, int color, t_win *win)
+double mlx_draw_line(void *mlx_ptr, void *win_ptr, int x1, int y1, int x2, int y2, int color, t_win *win)
 {
 	(void)win;
     int dx = abs(x2 - x1);
@@ -133,11 +133,15 @@ void mlx_draw_line(void *mlx_ptr, void *win_ptr, int x1, int y1, int x2, int y2,
     int sx = x1 < x2 ? 1 : -1;
     int sy = y1 < y2 ? 1 : -1;
     int err = dx - dy;
+	double	distancetowall;
 
     while (1)
     {
-		if (win->map[(int)(y1 / win->cell_size)][(int)(x1 / win->cell_size)] == '1')
-			break;
+		if ((y1 / win->cell_size) >= 0 && (y1 / win->cell_size) < win->map_height && (x1 / win->cell_size) >= 0 && (x1 / win->cell_size) < win->map_width && win->map[(int)(y1 / win->cell_size)][(int)(x1 / win->cell_size)] == '1')
+		{
+			distancetowall = sqrt(pow(win->playerX - x1, 2) + pow(win->playerY - y1, 2));
+			return (distancetowall);
+		}
         mlx_pixel_put(mlx_ptr, win_ptr, x1, y1, color);
 		// printf("(%d)====(%d)\n", (y1 / win->cell_size), (x1 / win->cell_size));
         if ((x1 == x2 && y1 == y2))
@@ -157,34 +161,31 @@ void mlx_draw_line(void *mlx_ptr, void *win_ptr, int x1, int y1, int x2, int y2,
             y1 += sy;
         }
     }
+	return (0);
 }
 
 void	player_render(t_win *win, void *win_ptr, void *mlx_ptr)
 {
 	mlx_pixel_put(mlx_ptr, win_ptr, win->playerX, win->playerY, 0xFF0000);
-    float lineLength = 10000.0f;  // Length of the line to be drawn
-	float	ray_a = win->fov_A /  win->num_rays;
-	float	ray_angle = win->playerA - win->fov_A;
-	float	new_ray_angle = ray_angle;
-	float	mid_ray = win->fov_A / 2;
-	for (int col = 0; col < mid_ray; col++)
+    double lineLength = 10000.0f;  // Length of the line to be drawn
+	double	ray_a = win->fov_A / win->num_rays ;
+	double	ray_angle = win->playerA - (win->fov_A / 2);
+	double	distancetowall = 0;
+	double	wall_height;
+	for (int col = 0; col < win->num_rays; col++)
 	{
-		// float ray_x = cos(ray_angle);
-		// float ray_y = sin(ray_angle);
-		if (col < mid_ray)
-		{
-			float endX = win->playerX + lineLength * cos(new_ray_angle);
-			float endY = win->playerY + lineLength * sin(new_ray_angle);
-			new_ray_angle += ray_a;
-			mlx_draw_line(mlx_ptr, win_ptr, win->playerX, win->playerY, endX, endY, 0x0000FF, win);
-		}
-		else
-		{
-			float endX = win->playerX + lineLength * cos(ray_angle);
-			float endY = win->playerY + lineLength * sin(ray_angle);
-			ray_angle -= ray_a;
-			mlx_draw_line(mlx_ptr, win_ptr, win->playerX, win->playerY, endX, endY, 0x0000FF, win);
-		}
+		double endX = win->playerX + lineLength * cos(ray_angle);
+		double endY = win->playerY + lineLength * sin(ray_angle);
+		ray_angle += ray_a;
+		distancetowall = mlx_draw_line(mlx_ptr, win_ptr, win->playerX, win->playerY, endX, endY, 0x0000FF, win);
+		distancetowall *= cos(win->playerA - ray_angle);
+		wall_height = (win->cell_size / distancetowall) * 800;
+		double wall_screen_x = col;
+        double wall_screen_y = (WIN_HEIGHT / 2) - (wall_height / 2);
+		// (void)wall_screen_x, (void)wall_screen_y;
+        // Draw the wall segment on the screen
+        mlx_draw_line(mlx_ptr, win_ptr, wall_screen_x, wall_screen_y, wall_screen_x, wall_screen_y + wall_height, 0xFFFFFF, win);
+
 		// endX += cos(ray_a);
 		// endY += sin(ray_a);
 		// float rayX = win->playerX;
@@ -254,13 +255,13 @@ int main (int ac, char **av)
 	t_win win;
 
 	//initialize map and player's constants
-	win.cell_size = 20;
+	win.cell_size = 32;
 	win.map_height = 11;
 	win.map_width = 25;
 	win.playerX = 3.0 * win.cell_size;
 	win.playerY = 4.0 * win.cell_size;
 	win.playerA = 0;
-	win.fov_A = 60;
+	win.fov_A = M_PI / 3;
 	win.rays_A = WIN_WIDTH;
 	win.num_rays = 1200;
 	win.playerDX = cos(win.playerA) * 1;
