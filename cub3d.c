@@ -6,7 +6,7 @@
 /*   By: bhazzout <bhazzout@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/08 22:12:33 by bhazzout          #+#    #+#             */
-/*   Updated: 2023/07/14 05:58:22 by bhazzout         ###   ########.fr       */
+/*   Updated: 2023/07/15 06:38:43 by bhazzout         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,18 +35,18 @@ void	map_printer(char **map)
 	}
 }
 
-void	line_draw(t_win win, void *win_ptr, void *mlx_ptr, int x, int y, int j)
-{
+// void	line_draw(t_win win, void *win_ptr, void *mlx_ptr, int x, int y, int j)
+// {
 	
-	int i = 0;
-	int pixel_x = win.cell_size * x;
-	int pixel_y = win.cell_size * y;
-	while (i < win.cell_size)
-	{
-		mlx_pixel_put(mlx_ptr, win_ptr, pixel_x + i, pixel_y + j, 0xFF0000);
-		i++;
-	}
-}
+// 	int i = 0;
+// 	int pixel_x = win.cell_size * x;
+// 	int pixel_y = win.cell_size * y;
+// 	while (i < win.cell_size)
+// 	{
+// 		mlx_pixel_put(mlx_ptr, win_ptr, pixel_x + i, pixel_y + j, 0xFF0000);
+// 		i++;
+// 	}
+// }
 
 void	map_draw(t_win win, void *win_ptr, void *mlx_ptr, char **map)
 {
@@ -95,122 +95,213 @@ void	p_update(t_win *win)
 {
 	if (move_up == 0)
 	{
+		move_up = 1;
 		win->playerX += win->playerDX;
 		win->playerY += win->playerDY;
-		move_up = 1;
+		if (win->map[(int)(win->playerY / win->cell_size)][(int)(win->playerX / win->cell_size)] == '1')
+		{
+			win->playerX -= win->playerDX;
+			win->playerY -= win->playerDY;
+		}
 	}
 	if (move_down == 0)
 	{
+		move_down = 1;
 		win->playerX -= win->playerDX;
 		win->playerY -= win->playerDY;
-		move_down = 1;
+		if (win->map[(int)(win->playerY / win->cell_size)][(int)(win->playerX / win->cell_size)] == '1')
+		{
+			win->playerX += win->playerDX;
+			win->playerY += win->playerDY;
+		}
 	}
 	if (rotate_left == 0)
 	{
+		rotate_left = 1;
 		win->playerA -= 0.1;
 		// if (win->playerA < 0)
 		// 	win->playerA += M_PI * 2;
 		win->playerDX = cos(win->playerA);
 		win->playerDY = sin(win->playerA);
-		rotate_left = 1;
 	}
 	if (rotate_right == 0)
 	{
+		rotate_right = 1;
 		win->playerA += 0.1;
 		// if (win->playerA > M_PI * 2)
 		// 	win->playerA -= M_PI * 2;
 		win->playerDX = cos(win->playerA);
 		win->playerDY = sin(win->playerA);
-		rotate_right = 1;
 	}
 }
 
-double mlx_draw_line(void *mlx_ptr, void *win_ptr, int x1, int y1, int x2, int y2, int color, t_win *win)
+// void mlx_draw_line(void *mlx_ptr, void *win_ptr, int x1, int y1, int x2, int y2, int color, t_win *win)
+// {
+//     int dx = abs(x2 - x1);
+//     int dy = abs(y2 - y1);
+//     int sx = x1 < x2 ? 1 : -1;
+//     int sy = y1 < y2 ? 1 : -1;
+//     int err = dx - dy;
+
+//     while (1)
+//     {
+// 		if ((int)(y1 / win->cell_size) >= 0 && (int)(y1 / win->cell_size) < win->map_height && (int)(x1 / win->cell_size) >= 0 && (int)(x1 / win->cell_size) < win->map_width && win->map[(int)(y1 / win->cell_size)][(int)(x1 / win->cell_size)] == '1')
+// 		{
+// 			// printf("haaaa\n");
+// 			// distancetowall = sqrt(pow(win->playerX - x1, 2) + pow(win->playerY - y1, 2));
+// 			printf("(%d)====(%d)\n", (int)(y1 / win->cell_size), (int)(x1 / win->cell_size));
+// 			break;
+// 		}
+//         mlx_pixel_put(mlx_ptr, win_ptr, x1, y1, color);
+// 		// sleep(1);
+//         if ((x1 == x2 && y1 == y2))
+//             break;
+
+//        	int e2 = err * 2;
+
+//         if (e2 > -dy)
+//         {
+//             err -= dy;
+//             x1 += sx;
+//         }
+
+//         if (e2 < dx)
+//         {
+//             err += dx;
+//             y1 += sy;
+//         }
+//     }
+// 	// return (0);
+// }
+
+void mlx_draw_line(void *mlx_ptr, void *win_ptr, double x1, double y1, double x2, double y2, int color, t_win *win)
 {
-	(void)win;
-    int dx = abs(x2 - x1);
-    int dy = abs(y2 - y1);
-    int sx = x1 < x2 ? 1 : -1;
-    int sy = y1 < y2 ? 1 : -1;
-    int err = dx - dy;
-	double	distancetowall;
+    double deltaX = x2 - x1;
+    double deltaY = y2 - y1;
 
-    while (1)
+    double step = fabs(deltaX) > fabs(deltaY) ? fabs(deltaX) : fabs(deltaY);
+
+    double xIncrement = deltaX / step;
+    double yIncrement = deltaY / step;
+
+    double currentX = x1;
+    double currentY = y1;
+
+
+    for (int i = 0; i <= step; i++)
     {
-		if ((y1 / win->cell_size) >= 0 && (y1 / win->cell_size) < win->map_height && (x1 / win->cell_size) >= 0 && (x1 / win->cell_size) < win->map_width && win->map[(int)(y1 / win->cell_size)][(int)(x1 / win->cell_size)] == '1')
+        // Draw pixel at (currentX, currentY)
+		if ((int)(currentY / win->cell_size) >= 0 && (int)(currentY / win->cell_size) < win->map_height && (int)(currentX / win->cell_size) >= 0 && (int)(currentX / win->cell_size) < win->map_width && win->map[(int)(currentY / win->cell_size)][(int)(currentX / win->cell_size)] == '1')
 		{
-			distancetowall = sqrt(pow(win->playerX - x1, 2) + pow(win->playerY - y1, 2));
-			return (distancetowall);
+			break;
 		}
-        mlx_pixel_put(mlx_ptr, win_ptr, x1, y1, color);
-		// printf("(%d)====(%d)\n", (y1 / win->cell_size), (x1 / win->cell_size));
-        if ((x1 == x2 && y1 == y2))
-            break;
-
-        int e2 = err * 2;
-
-        if (e2 > -dy)
-        {
-            err -= dy;
-            x1 += sx;
-        }
-
-        if (e2 < dx)
-        {
-            err += dx;
-            y1 += sy;
-        }
+		mlx_pixel_put(mlx_ptr, win_ptr, currentX, currentY, color);
+        currentX += xIncrement;
+        currentY += yIncrement;
     }
-	return (0);
 }
+
+double distance_getter(double x1, double y1, double x2, double y2, t_win *win)
+{
+    double deltaX = x2 - x1;
+    double deltaY = y2 - y1;
+	double	distancetowall = 0;
+
+    double step = fabs(deltaX) > fabs(deltaY) ? fabs(deltaX) : fabs(deltaY);
+
+    double xIncrement = deltaX / step;
+    double yIncrement = deltaY / step;
+
+    double currentX = x1;
+    double currentY = y1;
+
+    for (int i = 0; i <= step; i++)
+    {
+        // Draw pixel at (currentX, currentY)
+		if ((currentY / win->cell_size) >= 0 && (currentY / win->cell_size) < win->map_height && (currentX / win->cell_size) >= 0 && (currentX / win->cell_size) < win->map_width && win->map[(int)(currentY / win->cell_size)][(int)(currentX / win->cell_size)] == '1')
+		{
+			// printf("haaaa\n");
+			distancetowall = sqrt(pow(win->playerX - currentX, 2) + pow(win->playerY - currentY, 2));
+			break ;
+		}
+        currentX += xIncrement;
+        currentY += yIncrement;
+    }
+	return (distancetowall);
+}
+
+// double distance_getter(int x1, int y1, int x2, int y2, t_win *win)
+// {
+//     int dx = abs(x2 - x1);
+//     int dy = abs(y2 - y1);
+//     int sx = x1 < x2 ? 1 : -1;
+//     int sy = y1 < y2 ? 1 : -1;
+//     int err = dx - dy;
+// 	double	distancetowall;
+// 	// int	index = 0;
+
+//     while (1)
+//     {
+// 		if ((y1 / win->cell_size) >= 0 && (y1 / win->cell_size) < win->map_height && (x1 / win->cell_size) >= 0 && (x1 / win->cell_size) < win->map_width && win->map[(int)(y1 / win->cell_size)][(int)(x1 / win->cell_size)] == '1')
+// 		{
+// 			distancetowall = sqrt(pow(win->playerX - x1, 2) + pow(win->playerY - y1, 2));
+// 			return (distancetowall);
+// 		}
+//         // mlx_pixel_put(mlx_ptr, win_ptr, x1, y1, color);
+// 		// printf("(%d)====(%d)\n", (y1 / win->cell_size), (x1 / win->cell_size));
+//         if ((x1 == x2 && y1 == y2))
+//             break;
+
+//         int e2 = err * 2;
+
+//         if (e2 > -dy)
+//         {
+//             err -= dy;
+//             x1 += sx;
+//         }
+
+//         if (e2 < dx)
+//         {
+//             err += dx;
+//             y1 += sy;
+//         }
+// 		// index++;
+//     }
+// 	return (0);
+// }
 
 void	player_render(t_win *win, void *win_ptr, void *mlx_ptr)
 {
-	mlx_pixel_put(mlx_ptr, win_ptr, win->playerX, win->playerY, 0xFF0000);
+	// mlx_pixel_put(mlx_ptr, win_ptr, win->playerX, win->playerY, 0x0000FF);
     double lineLength = 10000.0f;  // Length of the line to be drawn
 	double	ray_a = win->fov_A / win->num_rays ;
 	double	ray_angle = win->playerA - (win->fov_A / 2);
 	double	distancetowall = 0;
 	double	wall_height;
+	// int	index = 0;
 	for (int col = 0; col < win->num_rays; col++)
 	{
-		double endX = win->playerX + lineLength * cos(ray_angle);
-		double endY = win->playerY + lineLength * sin(ray_angle);
-		ray_angle += ray_a;
-		distancetowall = mlx_draw_line(mlx_ptr, win_ptr, win->playerX, win->playerY, endX, endY, 0x0000FF, win);
+		t_coor	end_coor;
+		end_coor.endX = win->playerX + lineLength * cos(ray_angle);
+		end_coor.endY = win->playerY + lineLength * sin(ray_angle);
+		end_coor.rayX = win->playerX;
+		end_coor.rayY = win->playerY;
+		// distancetowall = distance_getter(&end_coor, win);
+		distancetowall = distance_getter(win->playerX, win->playerY, end_coor.endX, end_coor.endY, win);
+		printf("this is the distance (%f)\n", distancetowall);
+		// mlx_draw_line(mlx_ptr, win_ptr, win->playerX, win->playerY, end_coor.endX, end_coor.endY, 0x0000FF, win);
 		distancetowall *= cos(win->playerA - ray_angle);
-		wall_height = (win->cell_size / distancetowall) * 800;
+		wall_height = WIN_HEIGHT * 500/ (win->cell_size * distancetowall);
 		double wall_screen_x = col;
-        double wall_screen_y = (WIN_HEIGHT / 2) - (wall_height / 2);
+        // double wall_screen_y = (WIN_HEIGHT / 2) - (wall_height / 2);
+		double wallTop = (WIN_HEIGHT - wall_height) / 2;
+    	// Calculate the bottom position of the wall segment
+    	double wallBottom = wallTop + wall_height;
 		// (void)wall_screen_x, (void)wall_screen_y;
         // Draw the wall segment on the screen
-        mlx_draw_line(mlx_ptr, win_ptr, wall_screen_x, wall_screen_y, wall_screen_x, wall_screen_y + wall_height, 0xFFFFFF, win);
-
-		// endX += cos(ray_a);
-		// endY += sin(ray_a);
-		// float rayX = win->playerX;
-		// float rayY = win->playerY;
-		// float distancetowall = 0;
-		// int hitwall = 0;
-		// while (hitwall == 0 && distancetowall < WIN_WIDTH)
-		// {
-		// 	rayX += cos(win->playerA);
-		// 	rayY += sin(win->playerA);
-		// 	int mapx = (int)(rayX / (win->cell_size));
-		// 	int mapy = (int)(rayY / (win->cell_size));
-		// 	// printf("(%d)(%d)\n", mapx, mapy);
-		// 	if (mapx >= 0 && mapx < win->map_width && mapy >= 0 && mapy < win->map_height && win->map[mapy][mapx] == 1)
-        //     {
-        //     	printf("Column: %d, Distance: %.2f\n", col, distancetowall);
-        //         distancetowall = sqrt(pow(win->playerX - rayX, 2) + pow(win->playerY- rayY, 2));
-        //         hitwall = 1;
-
-        //         // Draw the wall column based on distanceToWall
-		// 		mlx_draw_line(mlx_ptr, win_ptr, win->playerX, win->playerY, endX, endY, 0x0000FF, win);
-        //     }
-
-		// 	distancetowall += 1.0f;
-		// }
+        mlx_draw_line(mlx_ptr, win_ptr, wall_screen_x, wallTop, wall_screen_x, wallBottom, 0xFFFFFF, win);
+		ray_angle += ray_a;
+		// index++;
 	}
 }
 
@@ -239,7 +330,7 @@ int	key_handler(int keycode, t_win *win)
 	if (keycode == 1)//S
 		move_down = 0;
 	mlx_clear_window(win->mlx_ptr, win->win_ptr);
-	map_draw(*win, win->win_ptr, win->mlx_ptr, win->map);
+	// map_draw(*win, win->win_ptr, win->mlx_ptr, win->map);
 	p_update(win);
 	player_render(win, win->win_ptr, win->mlx_ptr);
 	// key_release_handler(keycode, win);
@@ -259,8 +350,8 @@ int main (int ac, char **av)
 	win.map_height = 11;
 	win.map_width = 25;
 	win.playerX = 3.0 * win.cell_size;
-	win.playerY = 4.0 * win.cell_size;
-	win.playerA = 0;
+	win.playerY = 2.0 * win.cell_size;
+	win.playerA = M_PI;
 	win.fov_A = M_PI / 3;
 	win.rays_A = WIN_WIDTH;
 	win.num_rays = 1200;
@@ -270,20 +361,11 @@ int main (int ac, char **av)
 	win.mlx_ptr = mlx_init();
 	win.f_map = one_map();
 	win.map = map_getter();
-	// map_printer(map);
 	win.win_ptr = mlx_new_window(win.mlx_ptr, WIN_WIDTH, WIN_HEIGHT, "CUB3D");
-	map_draw(win, win.win_ptr, win.mlx_ptr, win.map);
+	// map_draw(win, win.win_ptr, win.mlx_ptr, win.map);
 	player_render(&win, win.win_ptr, win.mlx_ptr);
-	// mlx_key_hook(win.win_ptr, &key_handler, &win);
 	mlx_hook(win.win_ptr, 2, 0, &key_handler, &win);
 	// mlx_key_hook(win.win_ptr, &key_release_handler, &win);
 	mlx_hook(win.win_ptr, 17, 0L, &windows_close, NULL);
-	// while (1)
-	// {
-	// 	mlx_clear_window(mlx_ptr, win_ptr);
-	// 	p_update(win);
-	// 	player_render(win, win_ptr, mlx_ptr);
-	// 	usleep(10000);
-	// }
 	mlx_loop(win.mlx_ptr);
 }
