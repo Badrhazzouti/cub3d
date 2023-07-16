@@ -6,7 +6,7 @@
 /*   By: bhazzout <bhazzout@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/08 22:12:42 by bhazzout          #+#    #+#             */
-/*   Updated: 2023/07/15 01:29:06 by bhazzout         ###   ########.fr       */
+/*   Updated: 2023/07/16 01:01:44 by bhazzout         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,15 +45,14 @@ typedef struct s_win
 	int			cell_size;
 	int			map_width;
 	int			map_height;
+	double		distance_towall;
 } t_win;
 
-typedef	struct s_end_coor
-{
-	double	endX;
-	double	endY;
-	double	rayX;
-	double	rayY;
-}	t_coor;
+// typedef	struct s_end_coor
+// {
+// 	double	rayX;
+// 	double	rayY;
+// }	t_coor;
 
 
 char	*get_next_line(int fd);
