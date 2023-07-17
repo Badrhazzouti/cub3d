@@ -6,7 +6,7 @@
 /*   By: bhazzout <bhazzout@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/08 22:12:33 by bhazzout          #+#    #+#             */
-/*   Updated: 2023/07/16 05:25:24 by bhazzout         ###   ########.fr       */
+/*   Updated: 2023/07/17 23:23:15 by bhazzout         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -163,30 +163,45 @@ void mlx_draw_line(void *mlx_ptr, void *win_ptr, double x1, double y1, double x2
 	}
 }
 
+// void distance_getter(double x1, double y1, double x2, double y2, t_win *win)
+// {
+//     double deltaX = x2 - x1;
+//     double deltaY = y2 - y1;
+
+//     double step = fabs(deltaX) > fabs(deltaY) ? fabs(deltaX) : fabs(deltaY);
+
+//     double xIncrement = deltaX / step;
+//     double yIncrement = deltaY / step;
+
+//     double currentX = x1;
+//     double currentY = y1;
+
+//     for (int i = 0; i <= step; i++)
+//     {
+//         // Draw pixel at (currentX, currentY)
+// 		if ((currentY / win->cell_size) >= 0 && (currentY / win->cell_size) < win->map_height && (currentX / win->cell_size) >= 0 && (currentX / win->cell_size) < win->map_width && win->map[(int)(currentY / win->cell_size)][(int)(currentX / win->cell_size)] == '1')
+// 		{
+// 			win->distance_towall = sqrt(pow(win->playerX - currentX, 2) + pow(win->playerY - currentY, 2));
+// 			break ;
+// 		}
+//         currentX += xIncrement;
+//         currentY += yIncrement;
+//     }
+// }
+
 void distance_getter(double x1, double y1, double x2, double y2, t_win *win)
 {
-    double deltaX = x2 - x1;
-    double deltaY = y2 - y1;
-
-    double step = fabs(deltaX) > fabs(deltaY) ? fabs(deltaX) : fabs(deltaY);
-
-    double xIncrement = deltaX / step;
-    double yIncrement = deltaY / step;
-
-    double currentX = x1;
-    double currentY = y1;
-
-    for (int i = 0; i <= step; i++)
-    {
-        // Draw pixel at (currentX, currentY)
-		if ((currentY / win->cell_size) >= 0 && (currentY / win->cell_size) < win->map_height && (currentX / win->cell_size) >= 0 && (currentX / win->cell_size) < win->map_width && win->map[(int)(currentY / win->cell_size)][(int)(currentX / win->cell_size)] == '1')
+	(void)x2;
+	while (y1 < y2)
+	{
+		if ((y1 / win->cell_size) >= 0 && (y1 / win->cell_size) < win->map_height && (x1 / win->cell_size) >= 0 && (x1 / win->cell_size) < win->map_width && win->map[(int)(y1 / win->cell_size)][(int)(x1 / win->cell_size)] == '1')
 		{
-			win->distance_towall = sqrt(pow(win->playerX - currentX, 2) + pow(win->playerY - currentY, 2));
+			win->distance_towall = sqrt(pow(win->playerX - x1, 2) + pow(win->playerY - y1, 2));
 			break ;
 		}
-        currentX += xIncrement;
-        currentY += yIncrement;
-    }
+		y1 += 1;
+	}
+	
 }
 
 void	player_render(t_win *win, void *win_ptr, void *mlx_ptr)
