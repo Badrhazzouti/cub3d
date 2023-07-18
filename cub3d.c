@@ -6,7 +6,7 @@
 /*   By: bhazzout <bhazzout@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/08 22:12:33 by bhazzout          #+#    #+#             */
-/*   Updated: 2023/07/17 23:23:15 by bhazzout         ###   ########.fr       */
+/*   Updated: 2023/07/18 00:58:52 by bhazzout         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -163,46 +163,56 @@ void mlx_draw_line(void *mlx_ptr, void *win_ptr, double x1, double y1, double x2
 	}
 }
 
-// void distance_getter(double x1, double y1, double x2, double y2, t_win *win)
-// {
-//     double deltaX = x2 - x1;
-//     double deltaY = y2 - y1;
-
-//     double step = fabs(deltaX) > fabs(deltaY) ? fabs(deltaX) : fabs(deltaY);
-
-//     double xIncrement = deltaX / step;
-//     double yIncrement = deltaY / step;
-
-//     double currentX = x1;
-//     double currentY = y1;
-
-//     for (int i = 0; i <= step; i++)
-//     {
-//         // Draw pixel at (currentX, currentY)
-// 		if ((currentY / win->cell_size) >= 0 && (currentY / win->cell_size) < win->map_height && (currentX / win->cell_size) >= 0 && (currentX / win->cell_size) < win->map_width && win->map[(int)(currentY / win->cell_size)][(int)(currentX / win->cell_size)] == '1')
-// 		{
-// 			win->distance_towall = sqrt(pow(win->playerX - currentX, 2) + pow(win->playerY - currentY, 2));
-// 			break ;
-// 		}
-//         currentX += xIncrement;
-//         currentY += yIncrement;
-//     }
-// }
-
 void distance_getter(double x1, double y1, double x2, double y2, t_win *win)
 {
-	(void)x2;
-	while (y1 < y2)
-	{
-		if ((y1 / win->cell_size) >= 0 && (y1 / win->cell_size) < win->map_height && (x1 / win->cell_size) >= 0 && (x1 / win->cell_size) < win->map_width && win->map[(int)(y1 / win->cell_size)][(int)(x1 / win->cell_size)] == '1')
+    double deltaX = x2 - x1;
+    double deltaY = y2 - y1;
+
+    double stepX = fabs(deltaX);
+	double stepY = fabs(deltaY);
+	double step;
+	
+	if (stepX > stepY)
+		step = stepX;
+	if (stepX < stepY)
+		step = stepY;
+
+    double xIncrement = deltaX / step;
+    double yIncrement = deltaY / step;
+
+    double currentX = x1;
+    double currentY = y1;
+
+    for (int i = 0; i <= step; i++)
+    {
+        // Draw pixel at (currentX, currentY)
+		if ((currentY / win->cell_size) >= 0 && (currentY / win->cell_size) < win->map_height && (currentX / win->cell_size) >= 0 && (currentX / win->cell_size) < win->map_width && win->map[(int)(currentY / win->cell_size)][(int)(currentX / win->cell_size)] == '1')
 		{
-			win->distance_towall = sqrt(pow(win->playerX - x1, 2) + pow(win->playerY - y1, 2));
+			win->distance_towall = sqrt(pow(currentX - win->playerX, 2) + pow(currentY - win->playerY, 2));
 			break ;
 		}
-		y1 += 1;
-	}
-	
+		if (currentX != x2)
+        	currentX += xIncrement;
+		if (currentY != y2)
+        	currentY += yIncrement;
+    }
 }
+
+// void distance_getter(double x1, double y1, double x2, double y2, t_win *win)
+// {
+// 	(void)x2;
+// 	while (y1 < y2)
+// 	{
+// 		if ((y1 / win->cell_size) >= 0 && (y1 / win->cell_size) < win->map_height && (x1 / win->cell_size) >= 0 && (x1 / win->cell_size) < win->map_width && win->map[(int)(y1 / win->cell_size)][(int)(x1 / win->cell_size)] == '1')
+// 		{
+// 			win->distance_towall = sqrt(pow(win->playerX - x1, 2) + pow(win->playerY - y1, 2));
+// 			break ;
+// 		}
+// 		y1 += 0.1;
+// 		x1 += 0.1;
+// 	}
+	
+// }
 
 void	player_render(t_win *win, void *win_ptr, void *mlx_ptr)
 {
@@ -210,10 +220,9 @@ void	player_render(t_win *win, void *win_ptr, void *mlx_ptr)
     double lineLength = 10000.0f;  // Length of the line to be drawn
 	double	ray_a = win->fov_A / win->num_rays ;
 	int		wall_height;
-	double	ray_angle = win->playerA - (win->fov_A / 2);
+	double	ray_angle = win->playerA - (win->fov_A / 2.0f);
 	void	*img_ptr;
 	img_ptr = mlx_new_image(mlx_ptr, WIN_WIDTH, WIN_HEIGHT);
-	// char *image;
 	for (int col = win->num_rays; col > 0; col--)
 	{
 		double	endX;
@@ -221,10 +230,8 @@ void	player_render(t_win *win, void *win_ptr, void *mlx_ptr)
 		endX = win->playerX + lineLength * cos(ray_angle);
 		endY = win->playerY + lineLength * sin(ray_angle);
 		distance_getter(win->playerX, win->playerY, endX, endY, win);
-		// mlx_draw_line(mlx_ptr, win_ptr, win->playerX, win->playerY, endX, endY, 0x0000FF, win);
 		win->distance_towall *= cos(win->playerA - ray_angle);
-		// wall_height = WIN_HEIGHT * 500/ (win->cell_size * win->distance_towall);
-		wall_height = (win->cell_size / win->distance_towall) * 500;
+		wall_height = (win->cell_size / win->distance_towall) * 300;
 		double wall_screen_x = col;
 		double wallTop = (WIN_HEIGHT - wall_height) / 2;
     	double wallBottom = wallTop + wall_height;
