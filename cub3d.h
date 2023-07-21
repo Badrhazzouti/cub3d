@@ -6,7 +6,7 @@
 /*   By: bhazzout <bhazzout@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/08 22:12:42 by bhazzout          #+#    #+#             */
-/*   Updated: 2023/07/18 00:42:07 by bhazzout         ###   ########.fr       */
+/*   Updated: 2023/07/21 02:15:56 by bhazzout         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ typedef struct s_win
 	double		fov_A;
 	double		rays_A;
 	int			num_rays;
-	int			cell_size;
+	double			cell_size;
 	int			map_width;
 	int			map_height;
 	double		distance_towall;
