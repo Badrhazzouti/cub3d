@@ -6,7 +6,7 @@
 /*   By: bhazzout <bhazzout@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/08 22:12:33 by bhazzout          #+#    #+#             */
-/*   Updated: 2023/07/21 22:54:46 by bhazzout         ###   ########.fr       */
+/*   Updated: 2023/07/22 15:47:42 by bhazzout         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -364,7 +364,7 @@ void distance_getter_old(double x1, double y1, double x2, double y2, t_win *win,
 	}
 }
 
-void	u_r_horizontal_check(t_win *win, double ray_angle)
+void	u_r_horizontal_checker(t_win *win, double ray_angle)
 {
 	double	x_n = 0;
 	double	y_n = 0;
@@ -377,7 +377,6 @@ void	u_r_horizontal_check(t_win *win, double ray_angle)
 
 	if (ray_angle == 0 || ray_angle == M_PI)
 	{
-		// win->distance_towall = 0;
 		return ;
 	}
 	if (ray_angle > 0 && ray_angle < M_PI) // the player is facing up
@@ -431,7 +430,7 @@ void	u_r_horizontal_check(t_win *win, double ray_angle)
 }
 
 
-void	 u_r_vertical_check(t_win *win, double ray_angle)
+void	 u_r_vertical_checker(t_win *win, double ray_angle)
 {
 	double	x_n = 0;
 	double	y_n = 0;
@@ -498,13 +497,33 @@ void	 u_r_vertical_check(t_win *win, double ray_angle)
 	}
 }
 
-void	distance_getter(t_win *win, double ray_angle)
+void	horizontal_check(t_win *win, double ray_angle)
 {
-	u_r_horizontal_check(win, ray_angle);
-	u_r_vertical_check(win, ray_angle);
+	double	offset_x;
+	double	offset_y;
+	double	first_x;
+	double	first_y;
+	double	hypothenuse;
+	if (ray_angle == 0 || ray_angle == M_PI)
+		return ;
+	if (ray_angle > 0 && ray_angle < M_PI)//the player is facing up
+	{
+		first_y = win->playerY - ((int)(win->playerY / win->cell_size));
+		if (ray_angle > 0 && ray_angle < M_PI / 2)//the player is facing right
+		{
+			hypothenuse = first_y / cos(M_PI_2 - ray_angle);
+		}
+	}
 }
 
-void	player_render(t_win *win, void *win_ptr, void *mlx_ptr)
+void	distance_getter(t_win *win, double ray_angle)
+{
+	u_r_horizontal_checker(win, ray_angle);
+	u_r_vertical_checker(win, ray_angle);
+	horizontal_check(win, ray_angle);
+}
+
+void	player_renderer(t_win *win, void *win_ptr, void *mlx_ptr)
 {
 	// mlx_pixel_put(mlx_ptr, win_ptr, win->playerX, win->playerY, 0x0000FF);
     double lineLength = 10000.0f;  // Length of the line to be drawn
@@ -535,6 +554,24 @@ void	player_render(t_win *win, void *win_ptr, void *mlx_ptr)
 	}
 	mlx_put_image_to_window(mlx_ptr, win_ptr, img_ptr, 0, 0);
 	mlx_destroy_image(mlx_ptr, img_ptr);
+}
+
+void	player_render(t_win *win, void *win_ptr, void *mlx_ptr)
+{
+	double	linelength = 10000.0f;
+	double	ray_incrementation = 0.0008;
+	double	ray_start = win->fov_A - (win->fov_A / 2);
+	double	ray_end = win->fov_A + (win->fov_A / 2);
+	double	ray_angle = ray_start;
+	void	*img_ptr;
+	img_ptr = mlx_new_image(mlx_ptr, WIN_WIDTH, WIN_HEIGHT);
+	while (ray_angle < ray_end)
+	{
+		ray_angle = ray_correct(ray_angle);
+		distance_getter(win, ray_angle);
+		ray_angle += ray_incrementation;
+	}
+	
 }
 
 // int	key_release_handler(int keycode, t_win *win)
