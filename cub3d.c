@@ -6,7 +6,7 @@
 /*   By: bhazzout <bhazzout@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/08 22:12:33 by bhazzout          #+#    #+#             */
-/*   Updated: 2023/07/22 15:47:42 by bhazzout         ###   ########.fr       */
+/*   Updated: 2023/07/23 23:29:21 by bhazzout         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -428,8 +428,6 @@ void	u_r_horizontal_checker(t_win *win, double ray_angle)
 		return ;
 	}
 }
-
-
 void	 u_r_vertical_checker(t_win *win, double ray_angle)
 {
 	double	x_n = 0;
@@ -453,7 +451,7 @@ void	 u_r_vertical_checker(t_win *win, double ray_angle)
 		{
 			y_n = win->playerY - tan(x_n - win->playerX);
 			offset_y = -(tan(ray_angle) * win->cell_size);
-		}
+		} 
 		else if (ray_angle > (3/2 )* M_PI && ray_angle < 2 * M_PI)//the player is facing down
 		{
 			new_angle = ray_angle - (3/2 )* M_PI;
@@ -497,22 +495,76 @@ void	 u_r_vertical_checker(t_win *win, double ray_angle)
 	}
 }
 
+void	vertical_check(t_win *win, double ray_angle)
+{
+	if (ray_angle == M_PI_2 || ray_angle == (3/2 )* M_PI)
+		return ;
+	if (ray_ang)
+}
+
 void	horizontal_check(t_win *win, double ray_angle)
 {
 	double	offset_x;
 	double	offset_y;
 	double	first_x;
 	double	first_y;
+	double	n_hypothenuse;
 	double	hypothenuse;
+	double	adjacent;
+	double	opposit;
 	if (ray_angle == 0 || ray_angle == M_PI)
 		return ;
 	if (ray_angle > 0 && ray_angle < M_PI)//the player is facing up
 	{
-		first_y = win->playerY - ((int)(win->playerY / win->cell_size));
-		if (ray_angle > 0 && ray_angle < M_PI / 2)//the player is facing right
+		first_y = (int)(win->playerY / win->cell_size);
+		adjacent = win->playerY - ((int)(win->playerY / win->cell_size));
+		if (ray_angle > 0 && ray_angle < M_PI_2)//the player is facing right
 		{
-			hypothenuse = first_y / cos(M_PI_2 - ray_angle);
+			first_x = tan(M_PI_2 - ray_angle) * adjacent + (win->playerX / win->cell_size);
+			n_hypothenuse = adjacent / cos(M_PI_2 - ray_angle);
+			hypothenuse = 1 / cos(M_PI_2 - ray_angle);
+			offset_x = sin(M_PI_2 - ray_angle) * hypothenuse;
 		}
+		else if (ray_angle > M_PI_2 && ray_angle < M_PI)//the player is facing left
+		{
+			first_x = (win->playerX / win->cell_size) - tan(ray_angle - M_PI_2) * adjacent;/////////////////////////////////////////
+			n_hypothenuse = adjacent / cos(ray_angle - M_PI_2);
+			hypothenuse = 1 / cos(ray_angle - M_PI_2);
+			offset_x = sin(M_PI_2 - ray_angle) * hypothenuse;
+		}
+		offset_y = -1;
+	}
+	else//the player is facing down
+	{
+		first_y = (int)(win->playerY / win->cell_size) + 1;
+		opposit = ((int)(win->playerY / win->cell_size) + 1) - win->playerY;
+		if (ray_angle > M_PI && ray_angle < (3/2 )* M_PI)//the player is facing left
+		{
+			first_x = (win->playerX / win->cell_size) - opposit / tan(ray_angle - M_PI);
+			n_hypothenuse = opposit / sin(ray_angle - M_PI);
+			hypothenuse = 1 / sin(ray_angle - M_PI);
+			offset_x = cos(ray_angle - M_PI) * hypothenuse;
+		}
+		else if (ray_angle > (3 / 2) * M_PI && ray_angle < 2 * M_PI)//the player is facing right
+		{
+			first_x = tan(ray_angle - (3 / 2) * M_PI) * opposit + (win->playerX / win->cell_size);
+			n_hypothenuse = opposit / cos(ray_angle - (3 / 2) * M_PI);
+			hypothenuse = 1 / cos(ray_angle - (3 / 2) * M_PI);
+			offset_x = sin(ray_angle - (3 / 2) * M_PI) * hypothenuse;
+		}
+		offset_y = 1;
+	}
+	while ((int)first_y >= 0 && (int)first_y < win->map_height && (int)first_x >= 0 
+		&& (int)first_x < win->map_width && win->map[(int)first_y][(int)first_x] != '1')
+	{
+		first_x += offset_x;
+		first_y += offset_y;
+		n_hypothenuse += hypothenuse;
+	}
+	if ((int)first_y >= 0 && (int)first_y < win->map_height && (int)first_x >= 0 
+		&& (int)first_x < win->map_width && win->map[(int)first_y][(int)first_x] == '1')
+	{
+		win->distance_towall = n_hypothenuse;
 	}
 }
 
@@ -521,6 +573,7 @@ void	distance_getter(t_win *win, double ray_angle)
 	u_r_horizontal_checker(win, ray_angle);
 	u_r_vertical_checker(win, ray_angle);
 	horizontal_check(win, ray_angle);
+	vertical_check(win, ray_angle);
 }
 
 void	player_renderer(t_win *win, void *win_ptr, void *mlx_ptr)

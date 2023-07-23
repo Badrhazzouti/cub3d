@@ -1,5 +1,6 @@
 {
     "files.associations": {
-        "complex": "c"
+        "complex": "c",
+        "__config": "cpp"
     }
 }
