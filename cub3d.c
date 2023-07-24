@@ -6,7 +6,7 @@
 /*   By: bhazzout <bhazzout@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/08 22:12:33 by bhazzout          #+#    #+#             */
-/*   Updated: 2023/07/23 23:29:21 by bhazzout         ###   ########.fr       */
+/*   Updated: 2023/07/24 02:38:47 by bhazzout         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -160,7 +160,8 @@ void mlx_draw_line(void *mlx_ptr, void *win_ptr, double x1, double y1, double x2
 	(void)win, (void)x2, (void)img_ptr;
 	while (y1 < y2)
 	{
-		pixel_to_img(img_ptr, mlx_ptr, x1, y1, color, win_ptr, win);
+		mlx_pixel_put(mlx_ptr, win_ptr, x1, y1, color);
+		// pixel_to_img(img_ptr, mlx_ptr, x1, y1, color, win_ptr, win);
 		y1 += 1;
 	}
 }
@@ -497,9 +498,69 @@ void	 u_r_vertical_checker(t_win *win, double ray_angle)
 
 void	vertical_check(t_win *win, double ray_angle)
 {
+	double	offset_x = 0;
+	double	offset_y = 0;
+	double	first_x = 0;
+	double	first_y = 0;
+	double	n_hypothenuse;
+	double	hypothenuse;
+	// double	adjacent;
+	double	opposit;
+
 	if (ray_angle == M_PI_2 || ray_angle == (3/2 )* M_PI)
 		return ;
-	if (ray_ang)
+	if (ray_angle < M_PI_2 || ray_angle > (3/2)*M_PI)//the player is facing right
+	{
+		first_x = (win->playerX / win->cell_size) + 1;
+		opposit = first_x - win->playerX;
+		if (ray_angle > 0 && ray_angle < M_PI_2)//the player is facing up
+		{
+			first_y = (win->playerY / win->cell_size) - (opposit / tan(M_PI_2 - ray_angle));
+			n_hypothenuse = opposit / sin(M_PI_2 - ray_angle);
+			hypothenuse = 1 / sin(M_PI_2 - ray_angle);
+			offset_y = -(1 / tan(M_PI_2 - ray_angle));
+		}
+		else if (ray_angle > (3/2 )* M_PI && ray_angle < 2 * M_PI)//the player is facing down
+		{
+			first_y = (win->playerY / win->cell_size) + 1;
+			n_hypothenuse = opposit / sin(ray_angle - (3/2)*M_PI);
+			hypothenuse = 1 / sin(ray_angle - (3/2)*M_PI);
+			offset_y = 1 / tan(ray_angle - (3/2)*M_PI);
+		}
+		offset_x = 1;
+	}
+	else//the player is facing left
+	{
+		first_x = (win->playerX / win->cell_size);
+		opposit = win->playerX - first_x;
+		if (ray_angle > M_PI / 2 && ray_angle < M_PI)//the player is facing up
+		{
+			first_y = (win->playerY / win->cell_size) - opposit / tan(ray_angle - M_PI_2);
+			n_hypothenuse = opposit / sin(ray_angle - M_PI_2);
+			hypothenuse = 1 / sin(ray_angle - M_PI_2);
+			offset_y = -(1 / tan(ray_angle - M_PI_2));
+		}
+		else if (ray_angle > M_PI && ray_angle < (3/2 )* M_PI)//the player is facing down
+		{
+			first_y = tan(ray_angle - M_PI) * opposit + (win->playerY / win->cell_size);
+			n_hypothenuse = opposit / sin(ray_angle - M_PI);
+			hypothenuse = 1 / cos(ray_angle - M_PI);
+			offset_y = sin(ray_angle - M_PI) * hypothenuse;
+		}
+		offset_x = -1;
+	}
+	while ((int)first_y >= 0 && (int)first_y < win->map_height && (int)first_x >= 0 
+		&& (int)first_x < win->map_width && win->map[(int)first_y][(int)first_x] != '1')
+	{
+		first_x += offset_x;
+		first_y += offset_y;
+		n_hypothenuse += hypothenuse;
+	}
+	if ((int)first_y >= 0 && (int)first_y < win->map_height && (int)first_x >= 0 
+		&& (int)first_x < win->map_width && win->map[(int)first_y][(int)first_x] == '1')
+	{
+		win->distance_towall = n_hypothenuse;
+	}
 }
 
 void	horizontal_check(t_win *win, double ray_angle)
@@ -570,8 +631,8 @@ void	horizontal_check(t_win *win, double ray_angle)
 
 void	distance_getter(t_win *win, double ray_angle)
 {
-	u_r_horizontal_checker(win, ray_angle);
-	u_r_vertical_checker(win, ray_angle);
+	// u_r_horizontal_checker(win, ray_angle);
+	// u_r_vertical_checker(win, ray_angle);
 	horizontal_check(win, ray_angle);
 	vertical_check(win, ray_angle);
 }
@@ -611,17 +672,29 @@ void	player_renderer(t_win *win, void *win_ptr, void *mlx_ptr)
 
 void	player_render(t_win *win, void *win_ptr, void *mlx_ptr)
 {
-	double	linelength = 10000.0f;
+	// double	linelength = 10000.0f;
 	double	ray_incrementation = 0.0008;
 	double	ray_start = win->fov_A - (win->fov_A / 2);
 	double	ray_end = win->fov_A + (win->fov_A / 2);
 	double	ray_angle = ray_start;
 	void	*img_ptr;
+	double	wall_height;
+	double	col = win->num_rays / win->fov_A;
+	double	wall_screen_x = 0;
 	img_ptr = mlx_new_image(mlx_ptr, WIN_WIDTH, WIN_HEIGHT);
 	while (ray_angle < ray_end)
 	{
-		ray_angle = ray_correct(ray_angle);
+		// ray_angle = ray_correct(ray_angle);
 		distance_getter(win, ray_angle);
+		win->distance_towall *= cos(win->playerA - ray_angle);
+		wall_height = (win->cell_size / win->distance_towall) * 554;
+		// wall_height = 100;
+		double wallTop = (WIN_HEIGHT - wall_height) / 2;
+    	// double wallBottom = wallTop + wall_height;
+        mlx_draw_line(mlx_ptr, win_ptr, wall_screen_x, 0, wall_screen_x, wallTop, 0xFFFFFF, win, img_ptr);
+		// mlx_draw_line(mlx_ptr, win_ptr, wall_screen_x, wallTop, wall_screen_x, wallBottom, 0x000000, win, img_ptr);
+		// mlx_draw_line(mlx_ptr, win_ptr, wall_screen_x, wallBottom, wall_screen_x, WIN_HEIGHT, 0xFF0000, win, img_ptr);
+		wall_screen_x += col;
 		ray_angle += ray_incrementation;
 	}
 	
