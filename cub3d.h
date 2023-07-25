@@ -6,7 +6,7 @@
 /*   By: bhazzout <bhazzout@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/08 22:12:42 by bhazzout          #+#    #+#             */
-/*   Updated: 2023/07/21 02:15:56 by bhazzout         ###   ########.fr       */
+/*   Updated: 2023/07/25 22:56:53 by bhazzout         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ typedef struct s_win
 	double		fov_A;
 	double		rays_A;
 	int			num_rays;
-	double			cell_size;
+	int			cell_size;
 	int			map_width;
 	int			map_height;
 	double		distance_towall;
@@ -63,6 +63,6 @@ char	*ft_strchr(const char *s, int c);
 char	*ft_strdup(char *s1);
 char	**map_getter(void);
 void	map_printer(char **map);
-char	*one_map(void);
+char	**map2d_getter(int fd, int counter);
 
 #endif
