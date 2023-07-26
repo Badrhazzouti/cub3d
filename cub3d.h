@@ -6,7 +6,7 @@
 /*   By: bhazzout <bhazzout@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/08 22:12:42 by bhazzout          #+#    #+#             */
-/*   Updated: 2023/07/25 22:56:53 by bhazzout         ###   ########.fr       */
+/*   Updated: 2023/07/25 23:24:42 by bhazzout         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,5 +64,12 @@ char	*ft_strdup(char *s1);
 char	**map_getter(void);
 void	map_printer(char **map);
 char	**map2d_getter(int fd, int counter);
+int		calc_words(const char *s, char c);
+int		ft_wordlen(const char *s, int i, char c);
+char	*ft_charge(const char *s, int i, char c);
+void	*freeini(char **string, int len);
+char	**ft_split(const char *s, char sep);
+void	ft_bzero(void *s, size_t n);
+void	*ft_calloc(size_t count, size_t size);
 
 #endif
