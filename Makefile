@@ -3,17 +3,17 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: bhazzout <bhazzout@student.42.fr>          +#+  +:+       +#+         #
+#    By: jbalahce <jbalahce@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/07/08 22:22:17 by bhazzout          #+#    #+#              #
-#    Updated: 2023/07/25 23:25:24 by bhazzout         ###   ########.fr        #
+#    Updated: 2023/07/27 19:15:36 by jbalahce         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 
 NAME	= cub3D
 
-CFLAGS	= -Wall -Wextra -Werror -fsanitize=address -g3
+CFLAGS	= -Wall -Wextra -Werror -Wuninitialized #-fsanitize=address
 
 RM	= rm -rf
 
@@ -29,7 +29,7 @@ $(NAME): $(OBJECTS)
 clean:
 	$(RM) $(OBJECTS)
 
-fclean:
+fclean: clean
 	$(RM) $(NAME)
 
 re:	fclean all

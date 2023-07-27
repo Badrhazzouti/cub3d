@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cub3d.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bhazzout <bhazzout@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jbalahce <jbalahce@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/08 22:12:42 by bhazzout          #+#    #+#             */
-/*   Updated: 2023/07/25 23:24:42 by bhazzout         ###   ########.fr       */
+/*   Updated: 2023/07/27 18:38:31 by jbalahce         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,8 +25,8 @@
 #  define BUFFER_SIZE 10
 # endif
 
-#define WIN_WIDTH 1200
-#define WIN_HEIGHT 800
+#define WIN_WIDTH 900
+#define WIN_HEIGHT 600
 
 typedef struct s_win
 {
@@ -34,8 +34,8 @@ typedef struct s_win
 	char		**map;
 	void		*mlx_ptr;
 	void		*win_ptr;
-	double		playerX;
-	double		playerY;
+	int		playerX;
+	int		playerY;
 	double		playerDX;
 	double		playerDY;
 	double		playerA;

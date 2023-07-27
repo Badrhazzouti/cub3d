@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cub3d.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bhazzout <bhazzout@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jbalahce <jbalahce@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/08 22:12:33 by bhazzout          #+#    #+#             */
-/*   Updated: 2023/07/26 21:12:11 by bhazzout         ###   ########.fr       */
+/*   Updated: 2023/07/27 19:14:14 by jbalahce         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,7 +122,7 @@ void	 p_update(t_win *win)
 	}
 }
 
-void	pixel_to_img(void *img_ptr, void *mlx_ptr, double x, double y, int color, void *win_ptr, t_win *win)
+void	pixel_to_img(void *img_ptr, void *mlx_ptr, int x, int y, int color, void *win_ptr, t_win *win)
 {
 	(void)mlx_ptr, (void)win_ptr, (void)win;
 	int				bits_per_pixel = 0;
@@ -137,15 +137,12 @@ void	pixel_to_img(void *img_ptr, void *mlx_ptr, double x, double y, int color, v
 	img[index] = color;
 }
 
-void 
-
-mlx_draw_line(void *mlx_ptr, void *win_ptr, double x1, double y1, double x2, double y2, int color, t_win *win, void *img_ptr)
+void mlx_draw_line(void *mlx_ptr, void *win_ptr, double x1, double y1, double y2, int color, t_win *win, void *img_ptr)
 {
-	(void)win, (void)x2, (void)img_ptr;
 	while (y1 < y2)
 	{
-		mlx_pixel_put(mlx_ptr, win_ptr, x1, y1, color);
-		// pixel_to_img(img_ptr, mlx_ptr, x1, y1, color, win_ptr, win);
+		// mlx_pixel_put(mlx_ptr, win_ptr, x1, y1, color);
+		pixel_to_img(img_ptr, mlx_ptr, x1, y1, color, win_ptr, win);
 		y1 += 1;
 	}
 }
@@ -153,9 +150,9 @@ mlx_draw_line(void *mlx_ptr, void *win_ptr, double x1, double y1, double x2, dou
 double	ray_correct(double ray_angle)
 {
 	if (ray_angle < 0)
-		ray_angle += M_PI * 2;
-	if (ray_angle >= M_PI * 2)
-		ray_angle -= M_PI * 2;
+		ray_angle = ray_angle + (2 * M_PI);
+	if (ray_angle >= (2 * M_PI))
+		ray_angle = ray_angle - (2 * M_PI);
 	return (ray_angle);
 }
 
@@ -313,7 +310,6 @@ double	vertical_check(t_win *win, double ray_angle)
 	double	offset_y = -1;
 	double	first_x = -1;
 	double	first_y = -1;
-	// double	n_hypothenuse = 0;
 	double	hypothenuse = 0;
 	double	adjacent = 0;
 	double	opposite = 0;
@@ -379,41 +375,11 @@ double	vertical_check(t_win *win, double ray_angle)
 		first_x += offset_x;
 		first_y += offset_y;
 	}
-
-	// while ((int)(first_y / win->cell_size) >= 0 && (int)(first_y / win->cell_size) < win->map_height && (int)(first_x / win->cell_size) >= 0 
-	// && (int)(first_x / win->cell_size) < win->map_width && win->map[(int)(first_y / win->cell_size)][(int)(first_x / win->cell_size)] != '1')
-	// {
-	// 	first_x += offset_x;
-	// 	first_y += offset_y;
-	// }	
-	// if ((int)(first_y / win->cell_size) >= 0 && (int)(first_y / win->cell_size) < win->map_height && (int)(first_x / win->cell_size) >= 0 
-	// 	&& (int)(first_x / win->cell_size) < win->map_width && win->map[(int)(first_y / win->cell_size)][(int)(first_x / win->cell_size)] == '1')
-	// {
-	// 	if (win->playerY >= first_y)
-	// 		opposite = win->playerY - first_y;
-	// 	if (win->playerY < first_y)
-	// 		opposite = first_y - win->playerY;
 		
-		opposite = win->playerY - first_y;
-		adjacent = win->playerX - first_x;
-		hypothenuse = sqrt(pow(adjacent, 2) + pow(opposite, 2));//hypothenuse
+	opposite = win->playerY - first_y;
+	adjacent = win->playerX - first_x;
+	hypothenuse = sqrt(pow(adjacent, 2) + pow(opposite, 2));//hypothenuse
 	return (hypothenuse);
-	// }
-	
-	// while ((int)first_y >= 0 && (int)first_y < win->map_height && (int)first_x >= 0 
-	// 	&& (int)first_x < win->map_width && win->map[(int)first_y][(int)first_x] == '0')
-	// {
-	// 	first_x += offset_x;
-	// 	first_y += offset_y;
-	// 	n_hypothenuse += hypothenuse;
-	// }
-	// printf("distance is (%d)\n", (int)first_x);
-	// 	printf("distance (y) is (%d)\n", (int)first_y);
-	// if ((int)first_y >= 0 && (int)first_y < win->map_height && (int)first_x >= 0 
-	// 	&& (int)first_x < win->map_width && win->map[(int)first_y][(int)first_x] == '1')
-	// {
-	// 	win->distance_towall = n_hypothenuse;
-	// }
 }
 
 double	horizontal_check(t_win *win, double ray_angle)
@@ -438,7 +404,7 @@ double	horizontal_check(t_win *win, double ray_angle)
 	if (ray_angle == M_PI_2)
 	{
 		first_x = win->playerX;
-		first_y = ((win->playerY / win->cell_size) * win->cell_size) - 1;
+		first_y = ((win->playerY / win->cell_size) * win->cell_size) - 0.0000001;///?
 		offset_x = 0;
 		offset_y = -win->cell_size;
 	}
@@ -485,34 +451,10 @@ double	horizontal_check(t_win *win, double ray_angle)
 		first_x += offset_x;
 		first_y += offset_y;
 	}
-	// while ((int)(first_y / win->cell_size) >= 0 && (int)(first_y / win->cell_size) < win->map_height && (int)(first_x / win->cell_size) >= 0 
-	// 	&& (int)(first_x / win->cell_size) < win->map_width && win->map[(int)(first_y / win->cell_size)][(int)(first_x / win->cell_size)] != '1')
-	// {
-	// 	first_x += offset_x;
-	// 	first_y += offset_y;
-	// }
-	// if ((int)(first_y / win->cell_size) >= 0 && (int)(first_y / win->cell_size) < win->map_height && (int)(first_x / win->cell_size) >= 0 
-	// 	&& (int)(first_x / win->cell_size) < win->map_width && win->map[(int)(first_y / win->cell_size)][(int)(first_x / win->cell_size)] == '1')
-	// {
-		opposite = win->playerY - first_y;
-		adjacent = win->playerX - first_x;
-		hypothenuse = sqrt(pow(adjacent, 2) + pow(opposite, 2));//hypothenuse
-		return (hypothenuse);
-
-	// }
-	// while ((int)first_y >= 0 && (int)first_y < win->map_height && (int)first_x >= 0 
-	// 	&& (int)first_x < win->map_width && win->map[(int)first_y][(int)first_x] != '1')
-	// {
-	// 	first_x += offset_x;
-	// 	first_y += offset_y;
-
-	// 	n_hypothenuse += hypothenuse;
-	// }
-	// if ((int)first_y >= 0 && (int)first_y < win->map_height && (int)first_x >= 0 && (int)first_x < win->map_width && win->map[(int)first_y][(int)first_x] == '1')
-	// {
-	// 	if (win->distance_towall > n_hypothenuse)
-	// 		win->distance_towall = n_hypothenuse;
-	// }
+	opposite = win->playerY - first_y;
+	adjacent = win->playerX - first_x;
+	hypothenuse = sqrt(pow(adjacent, 2) + pow(opposite, 2));//hypothenuse
+	return (hypothenuse);
 }
 
 double	distance_getter(t_win *win, double ray_angle)
@@ -525,8 +467,6 @@ double	distance_getter(t_win *win, double ray_angle)
 	// double	first_x = win->playerX - y_d * sin(ray_angle);
 	ver_dist = vertical_check(win, ray_angle);
 	hor_dist = horizontal_check(win, ray_angle);
-	if (ver_dist < 0 && hor_dist < 0)
-		printf("fuuuuuuuck\n");
 	if (ver_dist < 0)
 		return (hor_dist);
 	if (hor_dist < 0)
@@ -555,16 +495,16 @@ void	player_renderer(t_win *win, void *win_ptr, void *mlx_ptr)
 		endX = win->playerX + lineLength * cos(ray_angle);
 		endY = win->playerY + lineLength * sin(ray_angle);
 		// distance_getter_old(win->playerX, win->playerY, endX, endY, win, ray_angle);
-		distance_getter(win, ray_angle);
+		win->distance_towall = distance_getter(win, ray_angle);
 		win->distance_towall *= cos(win->playerA - ray_angle);
 		wall_height = (win->cell_size / win->distance_towall) * 554;
 		// wall_height = 100;
 		double wall_screen_x = col;
 		double wallTop = (WIN_HEIGHT - wall_height) / 2;
     	double wallBottom = wallTop + wall_height;
-        mlx_draw_line(mlx_ptr, win_ptr, wall_screen_x, 0, wall_screen_x, wallTop, 0xFFFFFF, win, img_ptr);
-		mlx_draw_line(mlx_ptr, win_ptr, wall_screen_x, wallTop, wall_screen_x, wallBottom, 0x000000, win, img_ptr);
-		mlx_draw_line(mlx_ptr, win_ptr, wall_screen_x, wallBottom, wall_screen_x, WIN_HEIGHT, 0xFF0000, win, img_ptr);
+        mlx_draw_line(mlx_ptr, win_ptr, wall_screen_x, 0, wallTop, 0xFFFFFF, win, img_ptr);
+		mlx_draw_line(mlx_ptr, win_ptr, wall_screen_x, wallTop, wallBottom, 0x000000, win, img_ptr);
+		mlx_draw_line(mlx_ptr, win_ptr, wall_screen_x, wallBottom,  WIN_HEIGHT, 0xFF0000, win, img_ptr);
 		ray_angle += ray_a;
 	}
 	mlx_put_image_to_window(mlx_ptr, win_ptr, img_ptr, 0, 0);
@@ -590,37 +530,40 @@ void draw_ray(void	*mlx_ptr, void *win_ptr, double dist, double ray)
 void	player_render(t_win *win, void *win_ptr, void *mlx_ptr)
 {
 	// double	linelength = 10000.0f;
+	win->playerA = ray_correct(win->playerA);
+
 	double	ray_incrementation = 0.00087266462;
-	double	ray_start = win->playerA - (M_PI / 3);
-	double	ray_end = win->playerA + (M_PI / 3);
+	double	ray_start = win->playerA - (win->fov_A / 2);
+	double	ray_end = win->playerA + (win->fov_A / 2);
 	double	ray_angle = ray_start;
 	double	ray_temp = ray_start;
 	void	*img_ptr = NULL;
-	double	wall_height;
-	double	col = 0;
+	double	wall_height = 0;
+	double	col = WIN_WIDTH;
 	double	wall_screen_x = 0;
-	// img_ptr = mlx_new_image(mlx_ptr, WIN_WIDTH, WIN_HEIGHT);
-	while (ray_angle < ray_end)
+	img_ptr && mlx_destroy_image(mlx_ptr,img_ptr);
+	img_ptr = mlx_new_image(mlx_ptr, WIN_WIDTH, WIN_HEIGHT);
+	while (ray_temp < ray_end)
 	{
-		win->distance_towall = -1;
 		ray_angle = ray_temp;
 		ray_angle = ray_correct(ray_angle);
 		win->distance_towall = distance_getter(win, ray_angle);
-		// win->distance_towall *= cos(win->playerA - ray_angle));
-		wall_height = (win->cell_size / win->distance_towall) * 554;
-		draw_ray(mlx_ptr, win_ptr, win->distance_towall, ray_angle);
+		win->distance_towall *= cos(win->playerA - ray_angle);
+		wall_height = (win->cell_size / win->distance_towall) * 800;
+		// draw_ray(mlx_ptr, win_ptr, win->distance_towall, ray_angle);
 		// printf("distance to wall  %f\n", win->distance_towall);
 		// wall_height = 100;
-		double wallTop = (WIN_HEIGHT / 2) - (wall_height / 2);
+		double wallTop = ((double)WIN_HEIGHT / 2) - (wall_height / 2);
 		wall_screen_x = col;
-    	double wallBottom = wallTop + wall_height;
+    	double wallBottom = ((double)WIN_HEIGHT / 2) + (wall_height / 2);
         // mlx_draw_line(mlx_ptr, win_ptr, wall_screen_x, 0, wall_screen_x, wallTop, 0xFF00FF, win, img_ptr);
-		mlx_draw_line(mlx_ptr, win_ptr, wall_screen_x, wallTop, wall_screen_x, wallBottom, 0x00FF00, win, img_ptr);
+		mlx_draw_line(mlx_ptr, win_ptr, wall_screen_x, wallTop, wallBottom, 0x00FF00, win, img_ptr);
 		// mlx_draw_line(mlx_ptr, win_ptr, wall_screen_x, wallBottom, wall_screen_x, WIN_HEIGHT, 0xFF0000, win, img_ptr);
 		ray_temp += ray_incrementation;
-		col++;
+		col--;
+		win->distance_towall = -1;
 	}
-	
+	mlx_put_image_to_window(mlx_ptr, win_ptr, img_ptr, 0, 0);
 }
 
 // int	key_release_handler(int keycode, t_win *win)
@@ -672,7 +615,7 @@ int main (int ac, char **av)
 	win.playerA = M_PI / 2;
 	win.fov_A = (M_PI / 3);
 	win.rays_A = WIN_WIDTH;
-	win.num_rays = 1200;
+	win.num_rays = WIN_WIDTH;
 	win.playerDX = cos(win.playerA);
 	win.playerDY = sin(win.playerA);
 	win.distance_towall = -1;
