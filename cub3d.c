@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cub3d.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jbalahce <jbalahce@student.42.fr>          +#+  +:+       +#+        */
+/*   By: bhazzout <bhazzout@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/08 22:12:33 by bhazzout          #+#    #+#             */
-/*   Updated: 2023/07/27 19:14:14 by jbalahce         ###   ########.fr       */
+/*   Updated: 2023/07/27 23:28:53 by bhazzout         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,14 @@
 
 int	move_up = 1;
 int	move_down = 1;
+int	move_left = 1;
+int	move_right = 1;
 int	rotate_left = 1;
 int	rotate_right = 1;
+int	forward_speed = 5;
+int	backward_speed = -5;
+int	right_speed = 5;
+int	left_speed = -5;
 
 
 int	windows_close(int keycode, void *param)
@@ -24,6 +30,15 @@ int	windows_close(int keycode, void *param)
 	exit (0);
 }
 
+
+double	ray_correct(double ray_angle)
+{
+	if (ray_angle < 0)
+		ray_angle = ray_angle + (2 * M_PI);
+	if (ray_angle >= (2 * M_PI))
+		ray_angle = ray_angle - (2 * M_PI);
+	return (ray_angle);
+}
 
 void	map_printer(char **map)
 {
@@ -80,23 +95,19 @@ void	map_draw(t_win win, void *win_ptr, void *mlx_ptr, char **map)
 
 void	 p_update(t_win *win)
 {
-	if (move_up == 0)
+	if (move_up == 0 || move_down == 0 || move_left == 0 || move_right == 0)
 	{
-		move_up = 1;
-		win->playerX += win->playerDX;
-		win->playerY += win->playerDY;
-		if (win->map[(int)(win->playerY / win->cell_size)][(int)(win->playerX / win->cell_size)] == '1')
-		{
-			win->playerX -= win->playerDX;
-			win->playerY -= win->playerDY;
-		}
-	}
-	if (move_down == 0)
-	{
-		move_down = 1;
-		win->playerX -= win->playerDX;
-		win->playerY -= win->playerDY;
-		if (win->map[(int)(win->playerY / win->cell_size)][(int)(win->playerX / win->cell_size)] == '1')
+		if (move_up == 0)
+			move_up = 1;
+		if (move_down == 0)
+			move_down = 1;
+		if (move_left == 0)
+			move_left = 1;
+		if (move_right == 0)
+			move_right = 1;
+		int	new_x = (int)((win->playerX + win->playerDX) / win->cell_size);
+		int	new_y = (int)((win->playerY + win->playerDY) / win->cell_size);
+		if (new_y > 0 && new_y < win->map_height && new_x > 0 && new_x < win->map_width && win->map[new_y][new_x] != '1')
 		{
 			win->playerX += win->playerDX;
 			win->playerY += win->playerDY;
@@ -106,8 +117,7 @@ void	 p_update(t_win *win)
 	{
 		rotate_left = 1;
 		win->playerA -= 0.1;
-		if (win->playerA < 0)
-			win->playerA += M_PI * 2;
+		ray_correct(win->playerA);
 		win->playerDX = cos(win->playerA);
 		win->playerDY = sin(win->playerA);
 	}
@@ -115,8 +125,7 @@ void	 p_update(t_win *win)
 	{
 		rotate_right = 1;
 		win->playerA += 0.1;
-		if (win->playerA >= M_PI * 2)
-			win->playerA -= M_PI * 2;
+		ray_correct(win->playerA);
 		win->playerDX = cos(win->playerA);
 		win->playerDY = sin(win->playerA);
 	}
@@ -141,166 +150,8 @@ void mlx_draw_line(void *mlx_ptr, void *win_ptr, double x1, double y1, double y2
 {
 	while (y1 < y2)
 	{
-		// mlx_pixel_put(mlx_ptr, win_ptr, x1, y1, color);
 		pixel_to_img(img_ptr, mlx_ptr, x1, y1, color, win_ptr, win);
 		y1 += 1;
-	}
-}
-
-double	ray_correct(double ray_angle)
-{
-	if (ray_angle < 0)
-		ray_angle = ray_angle + (2 * M_PI);
-	if (ray_angle >= (2 * M_PI))
-		ray_angle = ray_angle - (2 * M_PI);
-	return (ray_angle);
-}
-
-void	u_r_horizontal_checker(t_win *win, double ray_angle)
-{
-	double	x_n = 0;
-	double	y_n = 0;
-	// double	hypothenuse;
-	// double	opposite;
-	// double	adjacent;
-	double	offset_x = 0;
-	double	offset_y = 0;
-	double	new_ray_angle;
-
-	if (ray_angle == 0 || ray_angle == M_PI)
-		return ;
-	if (ray_angle > 0 && ray_angle < M_PI) // the player is facing up
-	{
-		y_n = ((int)(win->playerY / win->cell_size) * win->cell_size) - 0.0000001;
-		if (ray_angle > 0 && ray_angle < M_PI / 2)//the player is facing right
-		{
-			x_n = (win->playerY - y_n) / tan(ray_angle) + win->playerX;
-			offset_x = win->cell_size / tan(ray_angle);
-		}
-		else if (ray_angle == M_PI_2)
-		{
-			x_n = win->playerX;
-			offset_x = 0;
-		}
-		else if (ray_angle > M_PI / 2 && ray_angle < M_PI)//the player is facing left
-		{
-			new_ray_angle = M_PI - ray_angle;
-			x_n = win->playerX - ((win->playerY - y_n)/tan(new_ray_angle));
-			offset_x = -(win->cell_size / tan(new_ray_angle));
-		}
-		offset_y = -win->cell_size;
-	}
-	else // the player is facing down
-	{
-		y_n = ((int)(win->playerY / win->cell_size) * win->cell_size) + win->cell_size;
-		if (ray_angle > M_PI && ray_angle < (3/2 )* M_PI)//the player is facing left
-		{
-			new_ray_angle = ray_angle - M_PI;
-			x_n = win->playerX - ((y_n - win->playerY) / tan(new_ray_angle));
-			offset_x = (win->cell_size / tan(new_ray_angle)) * (-1);
-		}
-		else if (ray_angle == (3/2)*M_PI)
-		{
-			x_n = win->playerX;
-			offset_x = 0;
-		}
-		else if (ray_angle > (3/2 )* M_PI && ray_angle < 2 * M_PI)//the player is facing right
-		{
-			new_ray_angle = ray_angle - (3/2 )* M_PI;
-			x_n = tan(new_ray_angle) * (y_n - win->playerY) + win->playerX;
-			offset_x = tan(new_ray_angle) * win->cell_size;
-		}
-		offset_y = win->cell_size;
-	}
-	// while ((int)(y_n / win->cell_size) >= 0 && (int)(y_n / win->cell_size) < win->map_height && (int)(x_n / win->cell_size) >= 0 
-	// 	&& (int)(x_n / win->cell_size) < win->map_width && win->map[(int)(y_n / win->cell_size)][(int)(x_n / win->cell_size)] != '1')
-	// {
-	// 	x_n += offset_x;
-	// 	y_n += offset_y;
-	// }
-	// if ((int)(y_n / win->cell_size) >= 0 && (int)(y_n / win->cell_size) < win->map_height && (int)(x_n / win->cell_size) >= 0 
-	// 	&& (int)(x_n / win->cell_size) < win->map_width && win->map[(int)(y_n / win->cell_size)][(int)(x_n / win->cell_size)] == '1')
-	// {
-	// 	opposite = win->playerY - y_n;
-	// 	adjacent = win->playerX - x_n;
-	// 	hypothenuse = sqrt(pow(adjacent, 2) + pow(opposite, 2));//hypothenuse
-	// 	win->distance_towall = hypothenuse;
-	// }
-}
-void	 u_r_vertical_checker(t_win *win, double ray_angle)
-{
-	double	x_n = 0;
-	double	y_n = 0;
-	double	hypothenuse;
-	double	opposite;
-	double	adjacent;
-	double	offset_x = 0;
-	double	offset_y = 0;
-	double	new_angle;
-
-	if (ray_angle == M_PI / 2 || ray_angle == (3/2 )* M_PI)
-	{
-		return ;
-	}
-	if (ray_angle < M_PI / 2 || ray_angle > (3/2 )* M_PI)//the player is facing right
-	{
-		x_n = ((int)(win->playerX / win->cell_size) * win->cell_size) + win->cell_size;
-		if (ray_angle > 0 && ray_angle < M_PI / 2)//the player is facing up
-		{
-			y_n = win->playerY - (tan(ray_angle) * (x_n - win->playerX));
-			offset_y = -(tan(ray_angle) * win->cell_size);
-		}
-		else if (ray_angle == 0)
-		{
-			y_n = win->playerY;
-			offset_y = 0;
-		}
-		else if (ray_angle > (3/2 )* M_PI && ray_angle < 2 * M_PI)//the player is facing down
-		{
-			new_angle = ray_angle - (3/2 ) * M_PI;
-			y_n = (x_n - win->playerX) / tan(new_angle) + win->playerY;
-			offset_y = win->cell_size / tan(new_angle);
-		}
-		offset_x = win->cell_size;
-	}
-	else// the player is facing left
-	{
-		x_n = ((int)(win->playerX / win->cell_size) * win->cell_size) - 1;
-		if (ray_angle > M_PI / 2 && ray_angle < M_PI)//the player is facing up
-		{
-			new_angle = M_PI - ray_angle;
-			y_n = win->playerY - tan(new_angle) * (win->playerX - x_n);
-			offset_y = -(tan(new_angle) * win->cell_size);
-		}
-		else if (ray_angle == M_PI)
-		{
-			y_n = win->playerY;
-			offset_y = 0;
-		}
-		else if (ray_angle > M_PI && ray_angle < (3/2 )* M_PI)//the player is facing down
-		{
-			new_angle = ray_angle - M_PI;
-			y_n = tan(new_angle) * (x_n - win->playerX) + win->playerY;
-			offset_y = tan(new_angle) * win->cell_size;
-		}
-		offset_x = -win->cell_size;
-	}
-	while ((int)(y_n / win->cell_size) >= 0 && (int)(y_n / win->cell_size) < win->map_height && (int)(x_n / win->cell_size) >= 0 
-	&& (int)(x_n / win->cell_size) < win->map_width && win->map[(int)(y_n / win->cell_size)][(int)(x_n / win->cell_size)] != '1')
-	{
-		x_n += offset_x;
-		y_n += offset_y;
-	}	
-	if ((int)(y_n / win->cell_size) >= 0 && (int)(y_n / win->cell_size) < win->map_height && (int)(x_n / win->cell_size) >= 0 
-		&& (int)(x_n / win->cell_size) < win->map_width && win->map[(int)(y_n / win->cell_size)][(int)(x_n / win->cell_size)] == '1')
-	{
-		opposite = win->playerY - y_n;
-		adjacent = win->playerX - x_n;
-		hypothenuse = sqrt(pow(adjacent, 2) + pow(opposite, 2));//hypothenuse
-		if (hypothenuse < win->distance_towall)
-			win->distance_towall = hypothenuse;
-		if (win->distance_towall < 0)
-			win->distance_towall = hypothenuse;
 	}
 }
 
@@ -388,7 +239,6 @@ double	horizontal_check(t_win *win, double ray_angle)
 	double	offset_y = -1;
 	double	first_x = -1;
 	double	first_y = -1;
-	// double	n_hypothenuse = 0;
 	double	hypothenuse = 0;
 	double	adjacent = 0;
 	double	opposite = 0;
@@ -461,10 +311,7 @@ double	distance_getter(t_win *win, double ray_angle)
 {
 	double ver_dist;
 	double hor_dist;
-	// u_r_horizontal_checker(win, ray_angle);
-	// u_r_vertical_checker(win, ray_angle);
-	// double	first_x = win->playerX + x_d * cos(ray_angle);
-	// double	first_x = win->playerX - y_d * sin(ray_angle);
+
 	ver_dist = vertical_check(win, ray_angle);
 	hor_dist = horizontal_check(win, ray_angle);
 	if (ver_dist < 0)
@@ -476,39 +323,6 @@ double	distance_getter(t_win *win, double ray_angle)
 	if (ver_dist >= hor_dist)
 		return (hor_dist);
 	return (-1);
-}
-
-void	player_renderer(t_win *win, void *win_ptr, void *mlx_ptr)
-{
-	// mlx_pixel_put(mlx_ptr, win_ptr, win->playerX, win->playerY, 0x0000FF);
-    double lineLength = 10000.0f;  // Length of the line to be drawn
-	double	ray_a = win->fov_A / win->num_rays ;
-	double	wall_height;
-	double	ray_angle = win->playerA - (win->fov_A / 2.0f);
-	void	*img_ptr;
-	img_ptr = mlx_new_image(mlx_ptr, WIN_WIDTH, WIN_HEIGHT);
-	for (double col = 0; col < win->num_rays; col += 1)
-	{
-		double	endX;
-		double	endY;
-		ray_angle = ray_correct(ray_angle);
-		endX = win->playerX + lineLength * cos(ray_angle);
-		endY = win->playerY + lineLength * sin(ray_angle);
-		// distance_getter_old(win->playerX, win->playerY, endX, endY, win, ray_angle);
-		win->distance_towall = distance_getter(win, ray_angle);
-		win->distance_towall *= cos(win->playerA - ray_angle);
-		wall_height = (win->cell_size / win->distance_towall) * 554;
-		// wall_height = 100;
-		double wall_screen_x = col;
-		double wallTop = (WIN_HEIGHT - wall_height) / 2;
-    	double wallBottom = wallTop + wall_height;
-        mlx_draw_line(mlx_ptr, win_ptr, wall_screen_x, 0, wallTop, 0xFFFFFF, win, img_ptr);
-		mlx_draw_line(mlx_ptr, win_ptr, wall_screen_x, wallTop, wallBottom, 0x000000, win, img_ptr);
-		mlx_draw_line(mlx_ptr, win_ptr, wall_screen_x, wallBottom,  WIN_HEIGHT, 0xFF0000, win, img_ptr);
-		ray_angle += ray_a;
-	}
-	mlx_put_image_to_window(mlx_ptr, win_ptr, img_ptr, 0, 0);
-	mlx_destroy_image(mlx_ptr, img_ptr);
 }
 
 void draw_ray(void	*mlx_ptr, void *win_ptr, double dist, double ray)
@@ -529,7 +343,6 @@ void draw_ray(void	*mlx_ptr, void *win_ptr, double dist, double ray)
 
 void	player_render(t_win *win, void *win_ptr, void *mlx_ptr)
 {
-	// double	linelength = 10000.0f;
 	win->playerA = ray_correct(win->playerA);
 
 	double	ray_incrementation = 0.00087266462;
@@ -539,7 +352,7 @@ void	player_render(t_win *win, void *win_ptr, void *mlx_ptr)
 	double	ray_temp = ray_start;
 	void	*img_ptr = NULL;
 	double	wall_height = 0;
-	double	col = WIN_WIDTH;
+	double	col = 0;
 	double	wall_screen_x = 0;
 	img_ptr && mlx_destroy_image(mlx_ptr,img_ptr);
 	img_ptr = mlx_new_image(mlx_ptr, WIN_WIDTH, WIN_HEIGHT);
@@ -550,17 +363,15 @@ void	player_render(t_win *win, void *win_ptr, void *mlx_ptr)
 		win->distance_towall = distance_getter(win, ray_angle);
 		win->distance_towall *= cos(win->playerA - ray_angle);
 		wall_height = (win->cell_size / win->distance_towall) * 800;
-		// draw_ray(mlx_ptr, win_ptr, win->distance_towall, ray_angle);
-		// printf("distance to wall  %f\n", win->distance_towall);
-		// wall_height = 100;
+		draw_ray(mlx_ptr, win_ptr, win->distance_towall, ray_angle);
 		double wallTop = ((double)WIN_HEIGHT / 2) - (wall_height / 2);
 		wall_screen_x = col;
     	double wallBottom = ((double)WIN_HEIGHT / 2) + (wall_height / 2);
-        // mlx_draw_line(mlx_ptr, win_ptr, wall_screen_x, 0, wall_screen_x, wallTop, 0xFF00FF, win, img_ptr);
-		mlx_draw_line(mlx_ptr, win_ptr, wall_screen_x, wallTop, wallBottom, 0x00FF00, win, img_ptr);
-		// mlx_draw_line(mlx_ptr, win_ptr, wall_screen_x, wallBottom, wall_screen_x, WIN_HEIGHT, 0xFF0000, win, img_ptr);
+        // mlx_draw_line(mlx_ptr, win_ptr, wall_screen_x, 0, wallTop, 0xFF00FF, win, img_ptr);
+		mlx_draw_line(mlx_ptr, win_ptr, wall_screen_x, wallTop, wallBottom, 0xFF7575, win, img_ptr);
+		// mlx_draw_line(mlx_ptr, win_ptr, wall_screen_x, wallBottom, WIN_HEIGHT, 0xFF0000, win, img_ptr);
 		ray_temp += ray_incrementation;
-		col--;
+		col++;
 		win->distance_towall = -1;
 	}
 	mlx_put_image_to_window(mlx_ptr, win_ptr, img_ptr, 0, 0);
@@ -583,13 +394,33 @@ void	player_render(t_win *win, void *win_ptr, void *mlx_ptr)
 int	key_handler(int keycode, t_win *win)
 {
 	if (keycode == 13)//W
+	{
 		move_up = 0;
-	if (keycode == 0)//A
-		rotate_left = 0;
-	if (keycode == 2)//D
-		rotate_right = 0;
+		win->playerDX = cos(win->playerA) * 5;
+		win->playerDY = sin(win->playerA) * 5;
+	}
 	if (keycode == 1)//S
+	{
 		move_down = 0;
+		win->playerDX = -cos(win->playerA) * 5;
+		win->playerDY = -sin(win->playerA) * 5;
+	}
+	if (keycode == 0)//A
+	{
+		move_left = 0;
+		win->playerDX = cos(win->playerA - M_PI_2) *5;
+		win->playerDY = sin(win->playerA - M_PI_2) *5;
+	}
+	if (keycode == 2)//D
+	{
+		move_right = 0;
+		win->playerDX = cos(win->playerA + M_PI_2) * 5;
+		win->playerDY = sin(win->playerA + M_PI_2) * 5;
+	}
+	if (keycode == 123)//cursor left
+		rotate_left = 0;
+	if (keycode == 124)//cursor right
+		rotate_right = 0;
 	mlx_clear_window(win->mlx_ptr, win->win_ptr);
 	// map_draw(*win, win->win_ptr, win->mlx_ptr, win->map);
 	p_update(win);
@@ -616,8 +447,8 @@ int main (int ac, char **av)
 	win.fov_A = (M_PI / 3);
 	win.rays_A = WIN_WIDTH;
 	win.num_rays = WIN_WIDTH;
-	win.playerDX = cos(win.playerA);
-	win.playerDY = sin(win.playerA);
+	// win.playerDX = cos(win.playerA) * 5;
+	// win.playerDY = sin(win.playerA) * 5;
 	win.distance_towall = -1;
 	
 	win.mlx_ptr = mlx_init();
