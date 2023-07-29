@@ -6,7 +6,7 @@
 /*   By: bhazzout <bhazzout@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/08 22:12:42 by bhazzout          #+#    #+#             */
-/*   Updated: 2023/07/29 02:44:08 by bhazzout         ###   ########.fr       */
+/*   Updated: 2023/07/29 18:47:07 by bhazzout         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,15 @@
 
 #define WIN_WIDTH 900
 #define WIN_HEIGHT 600
+
+typedef struct	s_wallhit
+{
+	// int		vert;
+	// int		hor;
+	double	dist;
+	double	x;
+	double	y;
+}	t_wallhit;
 
 typedef struct s_win
 {

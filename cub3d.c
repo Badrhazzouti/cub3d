@@ -6,7 +6,7 @@
 /*   By: bhazzout <bhazzout@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/08 22:12:33 by bhazzout          #+#    #+#             */
-/*   Updated: 2023/07/29 02:46:40 by bhazzout         ###   ########.fr       */
+/*   Updated: 2023/07/29 19:05:00 by bhazzout         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -155,174 +155,201 @@ void mlx_draw_line(void *mlx_ptr, void *win_ptr, double x1, double y1, double y2
 	}
 }
 
-double	vertical_check(t_win *win, double ray_angle)
+t_wallhit	vertical_check(t_win *win, double ray_angle, t_wallhit *ver)
 {
+	// t_wallhit 	ver;
 	double	offset_x = -1;
 	double	offset_y = -1;
-	double	first_x = -1;
-	double	first_y = -1;
-	double	hypothenuse = 0;
+	// double	first_x = -1;
+	ver->x = -1;
+	// double	first_y = -1;
+	ver->y = -1;
+	// double	hypothenuse = 0;
 	double	adjacent = 0;
 	double	opposite = 0;
 
 	if (ray_angle == 0)
 	{
-		first_x = ((win->playerX / win->cell_size) * win->cell_size) + win->cell_size;
-		first_y = win->playerY;
+		ver->x = ((win->playerX / win->cell_size) * win->cell_size) + win->cell_size;
+		ver->y = win->playerY;
 		offset_x = win->cell_size;
 		offset_y = 0;
 	}
 	if (0 < ray_angle && ray_angle < (M_PI / 2))
 	{
-		first_x = ((win->playerX / win->cell_size) * win->cell_size) + win->cell_size;
-		first_y = win->playerY - ((first_x - win->playerX) * tan(ray_angle));
+		ver->x = ((win->playerX / win->cell_size) * win->cell_size) + win->cell_size;
+		ver->y = win->playerY - ((ver->x - win->playerX) * tan(ray_angle));
 		offset_x = win->cell_size;
 		offset_y = -(win->cell_size * tan(ray_angle));
 	}
 	if (ray_angle == M_PI_2)
-		return (-1);
+	{
+		ver->dist = -1;
+		return (*ver);
+	}
 	if (M_PI_2 < ray_angle && ray_angle < M_PI)
 	{
-		first_x = ((win->playerX / win->cell_size) * win->cell_size) - 0.0000001;
-		first_y = win->playerY - ((win->playerX - first_x) * tan(M_PI - ray_angle));
+		ver->x = ((win->playerX / win->cell_size) * win->cell_size) - 0.0000001;
+		ver->y = win->playerY - ((win->playerX - ver->x) * tan(M_PI - ray_angle));
 		offset_x = -win->cell_size;
 		offset_y = -(win->cell_size * tan(M_PI - ray_angle));
 	}
 	if (ray_angle == M_PI)
 	{
-		first_x = ((win->playerX / win->cell_size) * win->cell_size) - 0.0000001;
-		first_y = win->playerY;
+		ver->x = ((win->playerX / win->cell_size) * win->cell_size) - 0.0000001;
+		ver->y = win->playerY;
 		offset_x = -(win->cell_size);
 		offset_y = 0;
 	}
 	if (M_PI < ray_angle && ray_angle < (3 * M_PI) / 2)
 	{
-		first_x = ((win->playerX / win->cell_size) * win->cell_size) - 0.0000001;
-		first_y = win->playerY + ((win->playerX - first_x) * tan(ray_angle - M_PI));
+		ver->x = ((win->playerX / win->cell_size) * win->cell_size) - 0.0000001;
+		ver->y = win->playerY + ((win->playerX - ver->x) * tan(ray_angle - M_PI));
 		offset_x = -win->cell_size;
 		offset_y = win->cell_size * tan(ray_angle - M_PI);
 	}
 	if (ray_angle == (3 * M_PI) / 2)
-		return (-1);
+	{
+		ver->dist = -1;
+		return (*ver);
+	}
 	if ((3 * M_PI) / 2 < ray_angle && ray_angle < (2 * M_PI))
 	{
-		first_x = ((win->playerX / win->cell_size) * win->cell_size) + win->cell_size;
-		first_y = win->playerY + ((first_x - win->playerX) * tan((2 * M_PI) - ray_angle));
+		ver->x = ((win->playerX / win->cell_size) * win->cell_size) + win->cell_size;
+		ver->y = win->playerY + ((ver->x - win->playerX) * tan((2 * M_PI) - ray_angle));
 		offset_x =  win->cell_size;
 		offset_y = win->cell_size * tan((2 * M_PI) - ray_angle);
 	}
-	if (first_x < 0 || first_y < 0)
-		return (-1);
+	if (ver->x < 0 || ver->y < 0)
+	{
+		ver->dist = -1;
+		return (*ver);
+	}
 	char map_value;
-	while (first_x != -1 && (int)first_y / win->cell_size < win->map_height
-		&& (int)first_y / win->cell_size >= 0 && (size_t)(first_x
-		/ win->cell_size) < ft_strlen((win->map)[(int)(first_y
+	while (ver->x != -1 && (int)ver->y / win->cell_size < win->map_height
+		&& (int)ver->y / win->cell_size >= 0 && (size_t)(ver->x
+		/ win->cell_size) < ft_strlen((win->map)[(int)(ver->y
 				/ win->cell_size)]))
 	{
-		map_value = (win->map)[(int)(first_y
-				/ win->cell_size)][(int)(first_x / win->cell_size)];
+		map_value = (win->map)[(int)(ver->y
+				/ win->cell_size)][(int)(ver->x / win->cell_size)];
 		if (map_value == '1' || map_value == ' ')
 			break ;
-		first_x += offset_x;
-		first_y += offset_y;
-	}
-		
-	opposite = win->playerY - first_y;
-	adjacent = win->playerX - first_x;
-	hypothenuse = sqrt(pow(adjacent, 2) + pow(opposite, 2));//hypothenuse
-	return (hypothenuse);
+		ver->x += offset_x;
+		ver->y += offset_y;
+	}	
+	opposite = win->playerY - ver->y;
+	adjacent = win->playerX - ver->x;
+	ver->dist = sqrt(pow(adjacent, 2) + pow(opposite, 2));//hypothenuse
+	return (*ver);
 }
 
-double	horizontal_check(t_win *win, double ray_angle)
+t_wallhit	horizontal_check(t_win *win, double ray_angle, t_wallhit *hor)
 {
 	double	offset_x = -1;
 	double	offset_y = -1;
-	double	first_x = -1;
-	double	first_y = -1;
-	double	hypothenuse = 0;
+	// double	first_x = -1;
+	hor->x = -1;
+	// double	first_y = -1;
+	hor->y = -1;
+	
+	// double	hypothenuse = 0;
 	double	adjacent = 0;
 	double	opposite = 0;
 	if (ray_angle == 0)
-		return (-1);
+	{
+		hor->dist = -1;
+		return (*hor);
+	}
 	if (0 < ray_angle && ray_angle < M_PI_2)
 	{
-		first_y = ((win->playerY / win->cell_size) * win->cell_size) - 0.0000001;
-		first_x = win->playerX + ((win->playerY - first_y)/ tan(ray_angle));
+		hor->y = ((win->playerY / win->cell_size) * win->cell_size) - 0.0000001;
+		hor->x = win->playerX + ((win->playerY - hor->y)/ tan(ray_angle));
 		offset_x = win->cell_size / tan(ray_angle);
 		offset_y = -win->cell_size;
 	}
 	if (ray_angle == M_PI_2)
 	{
-		first_x = win->playerX;
-		first_y = ((win->playerY / win->cell_size) * win->cell_size) - 0.0000001;///?
+		hor->x = win->playerX;
+		hor->y = ((win->playerY / win->cell_size) * win->cell_size) - 0.0000001;///?
 		offset_x = 0;
 		offset_y = -win->cell_size;
 	}
 	if (M_PI_2 < ray_angle && ray_angle < M_PI)
 	{
-		first_y = ((win->playerY / win->cell_size) * win->cell_size) - 0.0000001;
-		first_x = win->playerX - ((win->playerY - first_y) / tan(M_PI - ray_angle));
+		hor->y = ((win->playerY / win->cell_size) * win->cell_size) - 0.0000001;
+		hor->x = win->playerX - ((win->playerY - hor->y) / tan(M_PI - ray_angle));
 		offset_x = -(win->cell_size / tan(M_PI - ray_angle));
 		offset_y = -win->cell_size;
 	}
 	if (ray_angle == M_PI)
-		return (-1);
+	{
+		hor->dist = -1;
+		return (*hor);
+	}
 	if (M_PI < ray_angle && ray_angle < (3 * M_PI) / 2)
 	{
-		first_y = ((win->playerY / win->cell_size) * win->cell_size) + win->cell_size;
-		first_x = win->playerX - ((first_y - win->playerY) / tan(ray_angle - M_PI));
+		hor->y = ((win->playerY / win->cell_size) * win->cell_size) + win->cell_size;
+		hor->x = win->playerX - ((hor->y - win->playerY) / tan(ray_angle - M_PI));
 		offset_x = -(win->cell_size / tan(ray_angle - M_PI));
 		offset_y = win->cell_size;
 	}
 	if (ray_angle == (3 * M_PI) / 2)
 	{
-		first_x = win->playerX;
-		first_y = ((win->playerY / win->cell_size) * win->cell_size) + win->cell_size;
+		hor->x = win->playerX;
+		hor->y = ((win->playerY / win->cell_size) * win->cell_size) + win->cell_size;
 		offset_x = 0;
 		offset_y =  win->cell_size;
 	}
 	if ((3 * M_PI) / 2 < ray_angle && ray_angle < (2 * M_PI))
 	{
-		first_y = ((win->playerY / win->cell_size) * win->cell_size) + win->cell_size;
-		first_x = win->playerX + ((first_y - win->playerY) / tan((2 * M_PI) - ray_angle));
+		hor->y = ((win->playerY / win->cell_size) * win->cell_size) + win->cell_size;
+		hor->x = win->playerX + ((hor->y - win->playerY) / tan((2 * M_PI) - ray_angle));
 		offset_x = win->cell_size / tan((2 * M_PI) - ray_angle);
 		offset_y = win->cell_size;
 	}
-	if (first_x == -1 || first_y == -1)
-		return (-1);
-	char map_value;
-	while (first_x != -1 && (size_t)(first_x)
-		/ win->cell_size < ft_strlen((win->map)[(int)(first_y / win->cell_size)]))
+	if (hor->x == -1 || hor->y == -1)
 	{
-		map_value = (win->map)[(int)(first_y
-				/ win->cell_size)][(int)(first_x / win->cell_size)];
+		hor->dist = -1;
+		return (*hor);
+	}
+	char map_value;
+	while (hor->x != -1 && (size_t)(hor->x)
+		/ win->cell_size < ft_strlen((win->map)[(int)(hor->y / win->cell_size)]))
+	{
+		map_value = (win->map)[(int)(hor->y
+				/ win->cell_size)][(int)(hor->x / win->cell_size)];
 		if (map_value == '1' || map_value == ' ')
 			break ;
-		first_x += offset_x;
-		first_y += offset_y;
+		hor->x += offset_x;
+		hor->y += offset_y;
 	}
-	opposite = win->playerY - first_y;
-	adjacent = win->playerX - first_x;
-	hypothenuse = sqrt(pow(adjacent, 2) + pow(opposite, 2));//hypothenuse
-	return (hypothenuse);
+	opposite = win->playerY - hor->y;
+	adjacent = win->playerX - hor->x;
+	hor->dist = sqrt(pow(adjacent, 2) + pow(opposite, 2));//hypothenuse
+	return (*hor);
 }
 
-double	distance_getter(t_win *win, double ray_angle)
+t_wallhit	distance_getter(t_win *win, double ray_angle)
 {
-	double ver_dist;
-	double hor_dist;
+	t_wallhit ver;
+	t_wallhit hor;
 
-	ver_dist = vertical_check(win, ray_angle);
-	hor_dist = horizontal_check(win, ray_angle);
-	if (ver_dist < 0)
-		return (hor_dist);
-	if (hor_dist < 0)
-		return (ver_dist);
-	if (ver_dist < hor_dist)
-		return (ver_dist);
-	if (ver_dist >= hor_dist)
-		return (hor_dist);
-	return (-1);
+	ver = vertical_check(win, ray_angle, &ver);
+	hor = horizontal_check(win, ray_angle, &hor);
+	if (ver.dist < 0)
+		return (hor);
+	else if (hor.dist < 0)
+		return (ver);
+	else if (ver.dist < hor.dist)
+		return (ver);
+	else if (ver.dist >= hor.dist)
+		return (hor);
+	else
+	{
+		ver.dist = -1;
+		return(ver);
+	}
 }
 
 void draw_ray(void	*mlx_ptr, void *win_ptr, double dist, double ray)
@@ -345,6 +372,7 @@ void	player_render(t_win *win, void *win_ptr, void *mlx_ptr)
 {
 	win->playerA = ray_correct(win->playerA);
 
+	t_wallhit wall_hit;
 	double	ray_incrementation = 0.00087266462;
 	double	ray_start = win->playerA - (win->fov_A / 2);
 	double	ray_end = win->playerA + (win->fov_A / 2);
@@ -360,10 +388,10 @@ void	player_render(t_win *win, void *win_ptr, void *mlx_ptr)
 	{
 		ray_angle = ray_temp;
 		ray_angle = ray_correct(ray_angle);
-		win->distance_towall = distance_getter(win, ray_angle);
-		win->distance_towall *= cos(win->playerA - ray_angle);
-		wall_height = (win->cell_size / win->distance_towall) * 800;
-		draw_ray(mlx_ptr, win_ptr, win->distance_towall, ray_angle);
+		wall_hit = distance_getter(win, ray_angle);
+		wall_hit.dist *= cos(win->playerA - ray_angle);
+		wall_height = (win->cell_size / wall_hit.dist) * 800;
+		// draw_ray(mlx_ptr, win_ptr, wall_hit.dist, ray_angle);
 		double wallTop = ((double)WIN_HEIGHT / 2) - (wall_height / 2);
 		wall_screen_x = col;
     	double wallBottom = ((double)WIN_HEIGHT / 2) + (wall_height / 2);
@@ -372,7 +400,7 @@ void	player_render(t_win *win, void *win_ptr, void *mlx_ptr)
 		// mlx_draw_line(mlx_ptr, win_ptr, wall_screen_x, wallBottom, WIN_HEIGHT, 0xFF0000, win, img_ptr);
 		ray_temp += ray_incrementation;
 		col++;
-		win->distance_towall = -1;
+		wall_hit.dist = -1;
 	}
 	mlx_put_image_to_window(mlx_ptr, win_ptr, img_ptr, 0, 0);
 }
