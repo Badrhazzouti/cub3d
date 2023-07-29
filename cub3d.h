@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cub3d.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jbalahce <jbalahce@student.42.fr>          +#+  +:+       +#+        */
+/*   By: bhazzout <bhazzout@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/08 22:12:42 by bhazzout          #+#    #+#             */
-/*   Updated: 2023/07/27 18:38:31 by jbalahce         ###   ########.fr       */
+/*   Updated: 2023/07/29 02:44:08 by bhazzout         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,8 +34,8 @@ typedef struct s_win
 	char		**map;
 	void		*mlx_ptr;
 	void		*win_ptr;
-	int		playerX;
-	int		playerY;
+	int			playerX;
+	int			playerY;
 	double		playerDX;
 	double		playerDY;
 	double		playerA;
@@ -45,6 +45,8 @@ typedef struct s_win
 	int			cell_size;
 	int			map_width;
 	int			map_height;
+	// double		distance_towall_ns;
+	// double		distance_towall_eo;
 	double		distance_towall;
 } t_win;
 

@@ -6,7 +6,7 @@
 /*   By: bhazzout <bhazzout@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/08 22:12:33 by bhazzout          #+#    #+#             */
-/*   Updated: 2023/07/27 23:28:53 by bhazzout         ###   ########.fr       */
+/*   Updated: 2023/07/29 02:46:40 by bhazzout         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,7 +116,7 @@ void	 p_update(t_win *win)
 	if (rotate_left == 0)
 	{
 		rotate_left = 1;
-		win->playerA -= 0.1;
+		win->playerA -= 1;
 		ray_correct(win->playerA);
 		win->playerDX = cos(win->playerA);
 		win->playerDY = sin(win->playerA);
@@ -124,7 +124,7 @@ void	 p_update(t_win *win)
 	if (rotate_right == 0)
 	{
 		rotate_right = 1;
-		win->playerA += 0.1;
+		win->playerA += 1;
 		ray_correct(win->playerA);
 		win->playerDX = cos(win->playerA);
 		win->playerDY = sin(win->playerA);
@@ -395,35 +395,75 @@ int	key_handler(int keycode, t_win *win)
 {
 	if (keycode == 13)//W
 	{
-		move_up = 0;
+		// move_up = 0;
 		win->playerDX = cos(win->playerA) * 5;
-		win->playerDY = sin(win->playerA) * 5;
+		win->playerDY = -sin(win->playerA) * 5;
+		int	new_x = (int)((win->playerX + win->playerDX) / win->cell_size);
+		int	new_y = (int)((win->playerY + win->playerDY) / win->cell_size);
+		if (new_y > 0 && new_y < win->map_height && new_x > 0 && new_x < win->map_width && win->map[new_y][new_x] != '1')
+		{
+			win->playerX += win->playerDX;
+			win->playerY += win->playerDY;
+		}
 	}
 	if (keycode == 1)//S
 	{
-		move_down = 0;
-		win->playerDX = -cos(win->playerA) * 5;
+		// move_down = 0;
+		win->playerDX = cos(win->playerA) * 5;
 		win->playerDY = -sin(win->playerA) * 5;
+		int	new_x = (int)((win->playerX - win->playerDX) / win->cell_size);
+		int	new_y = (int)((win->playerY - win->playerDY) / win->cell_size);
+		if (new_y > 0 && new_y < win->map_height && new_x > 0 && new_x < win->map_width && win->map[new_y][new_x] != '1')
+		{
+			win->playerX -= win->playerDX;
+			win->playerY -= win->playerDY;
+		}
 	}
 	if (keycode == 0)//A
 	{
-		move_left = 0;
-		win->playerDX = cos(win->playerA - M_PI_2) *5;
-		win->playerDY = sin(win->playerA - M_PI_2) *5;
+		// move_left = 0;
+		win->playerDX = cos(win->playerA + M_PI_2) * 5;
+		win->playerDY = -sin(win->playerA + M_PI_2) * 5;
+		int	new_x = (int)((win->playerX - win->playerDX) / win->cell_size);
+		int	new_y = (int)((win->playerY - win->playerDY) / win->cell_size);
+		if (new_y > 0 && new_y < win->map_height && new_x > 0 && new_x < win->map_width && win->map[new_y][new_x] != '1')
+		{
+			win->playerX -= win->playerDX;
+			win->playerY -= win->playerDY;
+		}
 	}
 	if (keycode == 2)//D
 	{
-		move_right = 0;
+		// move_right = 0;
 		win->playerDX = cos(win->playerA + M_PI_2) * 5;
-		win->playerDY = sin(win->playerA + M_PI_2) * 5;
+		win->playerDY = -sin(win->playerA + M_PI_2) * 5;
+		int	new_x = (int)((win->playerX + win->playerDX) / win->cell_size);
+		int	new_y = (int)((win->playerY + win->playerDY) / win->cell_size);
+		if (new_y > 0 && new_y < win->map_height && new_x > 0 && new_x < win->map_width && win->map[new_y][new_x] != '1')
+		{
+			win->playerX += win->playerDX;
+			win->playerY += win->playerDY;
+		}
 	}
 	if (keycode == 123)//cursor left
-		rotate_left = 0;
+	{
+		// rotate_left = 0;
+		win->playerA -= 0.1;
+		ray_correct(win->playerA);
+		win->playerDX = cos(win->playerA);
+		win->playerDY = sin(win->playerA);
+	}
 	if (keycode == 124)//cursor right
-		rotate_right = 0;
-	mlx_clear_window(win->mlx_ptr, win->win_ptr);
+	{
+		// rotate_right = 0;
+		win->playerA += 0.1;
+		ray_correct(win->playerA);
+		win->playerDX = cos(win->playerA);
+		win->playerDY = sin(win->playerA);
+	}
 	// map_draw(*win, win->win_ptr, win->mlx_ptr, win->map);
 	p_update(win);
+	mlx_clear_window(win->mlx_ptr, win->win_ptr);
 	player_render(win, win->win_ptr, win->mlx_ptr);
 	// key_release_handler(keycode, win);
 	return (0);
