@@ -6,7 +6,7 @@
 /*   By: bhazzout <bhazzout@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/08 22:12:33 by bhazzout          #+#    #+#             */
-/*   Updated: 2023/07/29 19:05:00 by bhazzout         ###   ########.fr       */
+/*   Updated: 2023/07/30 22:20:29 by bhazzout         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -367,6 +367,32 @@ void draw_ray(void	*mlx_ptr, void *win_ptr, double dist, double ray)
 		i++;
 	}
 }
+
+// void	draw_colomn_v2(t_vars *vars, t_dist_info dist_info, t_win *win)
+// {
+// 	double	virt_hight;
+// 	double	start;
+// 	double	repeat_pixel;
+// 	double	i;
+// 	double	j;
+
+// 	i = 0;
+// 	virt_hight = ((double)(win->cell_size) / dist_info.distance) * SCALE;
+// 	repeat_pixel = (virt_hight) / (win->cell_size);
+// 	j = 1 / (repeat_pixel);
+// 	start = ((double)WIN_HEIGHT / 2) - (virt_hight / 2);
+// 	vars->wall.y_text = 0;
+// 	while (start <= ((double)WIN_HEIGHT / 2) + (virt_hight / 2))
+// 	{
+// 		my_put_pixel_to_image_v2(vars->img_ptr, vars->i, start, vars->wall);
+// 		// my_put_pixel_to_image_v2(vars->img_ptr, vars->i - 1, start, vars->wall);
+// 		start++;
+// 		i += j * 10;
+// 		(vars->wall.y_text) = i;
+// 	}
+// }
+
+int	put_walls(t_win *win, void *win_ptr, void *mlx_ptr, )
 
 void	player_render(t_win *win, void *win_ptr, void *mlx_ptr)
 {
