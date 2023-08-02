@@ -6,7 +6,7 @@
 /*   By: bhazzout <bhazzout@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/08 22:12:33 by bhazzout          #+#    #+#             */
-/*   Updated: 2023/07/30 22:20:29 by bhazzout         ###   ########.fr       */
+/*   Updated: 2023/08/02 22:49:38 by bhazzout         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -155,7 +155,57 @@ void mlx_draw_line(void *mlx_ptr, void *win_ptr, double x1, double y1, double y2
 	}
 }
 
-t_wallhit	vertical_check(t_win *win, double ray_angle, t_wallhit *ver)
+void	my_pixel_to_img(void *img_ptr, void *mlx_ptr, int x, int y, t_wall *wall, void *win_ptr, t_win *win)
+{
+	(void)mlx_ptr, (void)win_ptr, (void)win;
+	unsigned int	*img;
+	unsigned int	*texture;
+	int				bits_per_pixel = 0;
+	int				size_line = 0;
+	int				endian = 0;
+
+	img = (unsigned int *)mlx_get_data_addr(img_ptr, &bits_per_pixel, &size_line, &endian);
+	 int  index = (y * (size_line / 4) + x);
+	texture = (unsigned int *)mlx_get_data_addr(wall->text, &bits_per_pixel, &size_line, &endian);
+	 int	img_index = (wall->y * (size_line / 4) + wall->x);
+	printf("x: %d y : %d\n", wall->x, wall->y);
+	printf("v x: %d y : %d\n", x, y);
+	if (x < 0 || x >= WIN_WIDTH || y < 0 || y >= WIN_HEIGHT)
+		return ;
+	if (wall->x < 0 || wall->x >= CELL_SIZE || wall->y < 0 || wall->y >= CELL_SIZE * 10)
+		return ;
+	img[index] = texture[img_index];
+}
+
+void my_mlx_draw_line(void *mlx_ptr, void *win_ptr, double x1, double y1, double y2, t_win *win, void *img_ptr, t_wallhit *wallhit, t_wall *wall)
+{
+	(void)mlx_ptr, (void)win_ptr, (void)x1, (void)y1, (void)y2, (void)img_ptr, (void)wallhit, (void)win;
+	double	virt_hight;
+	double	start;
+	double	repeat_pixel;
+	double	i;
+	double	j;
+
+	i = 0;
+	virt_hight = ((double)(CELL_SIZE) / wallhit->dist) * 450;
+	repeat_pixel = (virt_hight) / ((double)CELL_SIZE);
+	j = 1 / (repeat_pixel);
+	start = ((double)WIN_HEIGHT / 2) - (virt_hight / 2);
+	if (wallhit->ver_hor == 1)
+		wall->x = (int)(wallhit->x) % (int)CELL_SIZE;
+	else
+		wall->x = (int)(wallhit->y) % (int)CELL_SIZE;
+	wall->y = 0;
+	while (y1 < y2)
+	{
+		my_pixel_to_img(img_ptr, mlx_ptr, x1, y1, wall, win_ptr, win);
+		y1 += 1;
+		i += j * 10;
+		wall->y = i;
+	}
+}
+
+t_wallhit	*vertical_check(t_win *win, double ray_angle, t_wallhit *ver)
 {
 	// t_wallhit 	ver;
 	double	offset_x = -1;
@@ -185,7 +235,7 @@ t_wallhit	vertical_check(t_win *win, double ray_angle, t_wallhit *ver)
 	if (ray_angle == M_PI_2)
 	{
 		ver->dist = -1;
-		return (*ver);
+		return (ver);
 	}
 	if (M_PI_2 < ray_angle && ray_angle < M_PI)
 	{
@@ -211,7 +261,7 @@ t_wallhit	vertical_check(t_win *win, double ray_angle, t_wallhit *ver)
 	if (ray_angle == (3 * M_PI) / 2)
 	{
 		ver->dist = -1;
-		return (*ver);
+		return (ver);
 	}
 	if ((3 * M_PI) / 2 < ray_angle && ray_angle < (2 * M_PI))
 	{
@@ -223,7 +273,7 @@ t_wallhit	vertical_check(t_win *win, double ray_angle, t_wallhit *ver)
 	if (ver->x < 0 || ver->y < 0)
 	{
 		ver->dist = -1;
-		return (*ver);
+		return (ver);
 	}
 	char map_value;
 	while (ver->x != -1 && (int)ver->y / win->cell_size < win->map_height
@@ -241,10 +291,11 @@ t_wallhit	vertical_check(t_win *win, double ray_angle, t_wallhit *ver)
 	opposite = win->playerY - ver->y;
 	adjacent = win->playerX - ver->x;
 	ver->dist = sqrt(pow(adjacent, 2) + pow(opposite, 2));//hypothenuse
-	return (*ver);
+	ver->ver_hor = 0;
+	return (ver);
 }
 
-t_wallhit	horizontal_check(t_win *win, double ray_angle, t_wallhit *hor)
+t_wallhit	*horizontal_check(t_win *win, double ray_angle, t_wallhit *hor)
 {
 	double	offset_x = -1;
 	double	offset_y = -1;
@@ -259,7 +310,7 @@ t_wallhit	horizontal_check(t_win *win, double ray_angle, t_wallhit *hor)
 	if (ray_angle == 0)
 	{
 		hor->dist = -1;
-		return (*hor);
+		return (hor);
 	}
 	if (0 < ray_angle && ray_angle < M_PI_2)
 	{
@@ -285,7 +336,7 @@ t_wallhit	horizontal_check(t_win *win, double ray_angle, t_wallhit *hor)
 	if (ray_angle == M_PI)
 	{
 		hor->dist = -1;
-		return (*hor);
+		return (hor);
 	}
 	if (M_PI < ray_angle && ray_angle < (3 * M_PI) / 2)
 	{
@@ -311,7 +362,7 @@ t_wallhit	horizontal_check(t_win *win, double ray_angle, t_wallhit *hor)
 	if (hor->x == -1 || hor->y == -1)
 	{
 		hor->dist = -1;
-		return (*hor);
+		return (hor);
 	}
 	char map_value;
 	while (hor->x != -1 && (size_t)(hor->x)
@@ -327,27 +378,41 @@ t_wallhit	horizontal_check(t_win *win, double ray_angle, t_wallhit *hor)
 	opposite = win->playerY - hor->y;
 	adjacent = win->playerX - hor->x;
 	hor->dist = sqrt(pow(adjacent, 2) + pow(opposite, 2));//hypothenuse
-	return (*hor);
+	hor->ver_hor = 1;
+	return (hor);
 }
 
-t_wallhit	distance_getter(t_win *win, double ray_angle)
+t_wallhit	*distance_getter(t_win *win, double ray_angle)
 {
-	t_wallhit ver;
-	t_wallhit hor;
+	t_wallhit *ver = (t_wallhit *)malloc(sizeof (t_wallhit));
+	t_wallhit *hor = (t_wallhit *)malloc(sizeof (t_wallhit));
 
-	ver = vertical_check(win, ray_angle, &ver);
-	hor = horizontal_check(win, ray_angle, &hor);
-	if (ver.dist < 0)
+	ver = vertical_check(win, ray_angle, ver);
+	hor = horizontal_check(win, ray_angle, hor);
+	if (ver->dist < 0)
+	{
+		free(ver);
 		return (hor);
-	else if (hor.dist < 0)
+	}
+	else if (hor->dist < 0)
+	{
+		free(hor);
 		return (ver);
-	else if (ver.dist < hor.dist)
+	}
+	else if (ver->dist < hor->dist)
+	{
+		free(hor);
 		return (ver);
-	else if (ver.dist >= hor.dist)
+	}
+	else if (ver->dist >= hor->dist)
+	{
+		free(ver);
 		return (hor);
+	}
 	else
 	{
-		ver.dist = -1;
+		free(hor);
+		ver->dist = -1;
 		return(ver);
 	}
 }
@@ -368,37 +433,36 @@ void draw_ray(void	*mlx_ptr, void *win_ptr, double dist, double ray)
 	}
 }
 
-// void	draw_colomn_v2(t_vars *vars, t_dist_info dist_info, t_win *win)
+// void	draw_colomn_v2(t_win *win, t_wallhit *wall, t_wall *texture, void *img_ptr, int	screen_x)
 // {
 // 	double	virt_hight;
 // 	double	start;
 // 	double	repeat_pixel;
 // 	double	i;
 // 	double	j;
-
 // 	i = 0;
-// 	virt_hight = ((double)(win->cell_size) / dist_info.distance) * SCALE;
+// 	virt_hight = ((double)(win->cell_size) / wall->dist) * 450;
 // 	repeat_pixel = (virt_hight) / (win->cell_size);
 // 	j = 1 / (repeat_pixel);
 // 	start = ((double)WIN_HEIGHT / 2) - (virt_hight / 2);
-// 	vars->wall.y_text = 0;
+// 	texture->y = 0;
 // 	while (start <= ((double)WIN_HEIGHT / 2) + (virt_hight / 2))
 // 	{
-// 		my_put_pixel_to_image_v2(vars->img_ptr, vars->i, start, vars->wall);
+// 		my_put_pixel_to_image_v2(img_ptr, vars->i, start, vars->wall);
 // 		// my_put_pixel_to_image_v2(vars->img_ptr, vars->i - 1, start, vars->wall);
 // 		start++;
 // 		i += j * 10;
-// 		(vars->wall.y_text) = i;
+// 		(vars->wall->y_text) = i;
 // 	}
 // }
 
-int	put_walls(t_win *win, void *win_ptr, void *mlx_ptr, )
-
 void	player_render(t_win *win, void *win_ptr, void *mlx_ptr)
 {
+	// win->wall = (t_wall *)malloc (sizeof(t_wall));
 	win->playerA = ray_correct(win->playerA);
 
-	t_wallhit wall_hit;
+	t_wallhit *wall_hit;
+	
 	double	ray_incrementation = 0.00087266462;
 	double	ray_start = win->playerA - (win->fov_A / 2);
 	double	ray_end = win->playerA + (win->fov_A / 2);
@@ -408,25 +472,29 @@ void	player_render(t_win *win, void *win_ptr, void *mlx_ptr)
 	double	wall_height = 0;
 	double	col = 0;
 	double	wall_screen_x = 0;
-	img_ptr && mlx_destroy_image(mlx_ptr,img_ptr);
+	// img_ptr && mlx_destroy_image(mlx_ptr,img_ptr);
 	img_ptr = mlx_new_image(mlx_ptr, WIN_WIDTH, WIN_HEIGHT);
+	win->wall->x = 0;
+	win->wall->y = 0;
+	// wall->text = NULL;
 	while (ray_temp < ray_end)
 	{
 		ray_angle = ray_temp;
 		ray_angle = ray_correct(ray_angle);
 		wall_hit = distance_getter(win, ray_angle);
-		wall_hit.dist *= cos(win->playerA - ray_angle);
-		wall_height = (win->cell_size / wall_hit.dist) * 800;
-		// draw_ray(mlx_ptr, win_ptr, wall_hit.dist, ray_angle);
+		wall_hit->dist *= cos(win->playerA - ray_angle);
+		wall_height = (win->cell_size / wall_hit->dist) * 400;
+		// draw_ray(mlx_ptr, win_ptr, wall_hit->dist, ray_angle);
 		double wallTop = ((double)WIN_HEIGHT / 2) - (wall_height / 2);
 		wall_screen_x = col;
     	double wallBottom = ((double)WIN_HEIGHT / 2) + (wall_height / 2);
         // mlx_draw_line(mlx_ptr, win_ptr, wall_screen_x, 0, wallTop, 0xFF00FF, win, img_ptr);
-		mlx_draw_line(mlx_ptr, win_ptr, wall_screen_x, wallTop, wallBottom, 0xFF7575, win, img_ptr);
+		// mlx_draw_line(mlx_ptr, win_ptr, wall_screen_x, wallTop, wallBottom, 0xFF7575, win, img_ptr);
+		my_mlx_draw_line(mlx_ptr, win_ptr, wall_screen_x, wallTop, wallBottom, img_ptr, win, wall_hit, win->wall);
 		// mlx_draw_line(mlx_ptr, win_ptr, wall_screen_x, wallBottom, WIN_HEIGHT, 0xFF0000, win, img_ptr);
 		ray_temp += ray_incrementation;
 		col++;
-		wall_hit.dist = -1;
+		wall_hit->dist = -1;
 	}
 	mlx_put_image_to_window(mlx_ptr, win_ptr, img_ptr, 0, 0);
 }
@@ -517,7 +585,7 @@ int	key_handler(int keycode, t_win *win)
 	}
 	// map_draw(*win, win->win_ptr, win->mlx_ptr, win->map);
 	p_update(win);
-	mlx_clear_window(win->mlx_ptr, win->win_ptr);
+	// mlx_clear_window(win->mlx_ptr, win->win_ptr);
 	player_render(win, win->win_ptr, win->mlx_ptr);
 	// key_release_handler(keycode, win);
 	return (0);
@@ -529,31 +597,39 @@ int main (int ac, char **av)
 	// void	*win_ptr;
 	// char	**map;
 	(void) av, (void) ac;
-	t_win win;
+	t_win *win;
+	win = (t_win *)malloc(sizeof(t_win));
 
 	//initialize map and player's constants
-	win.cell_size = 32;
-	win.map_height = 11;
-	win.map_width = 25;
-	win.playerX = 4.5 * 32;
-	win.playerY = 4.5 * 32;
-	win.playerA = M_PI / 2;
-	win.fov_A = (M_PI / 3);
-	win.rays_A = WIN_WIDTH;
-	win.num_rays = WIN_WIDTH;
-	// win.playerDX = cos(win.playerA) * 5;
-	// win.playerDY = sin(win.playerA) * 5;
-	win.distance_towall = -1;
+	win->cell_size = 32;
+	win->map_height = 11;
+	win->map_width = 25;
+	win->playerX = 4.5 * 32;
+	win->playerY = 4.5 * 32;
+	win->playerA = M_PI / 2;
+	win->fov_A = (M_PI / 3);
+	win->rays_A = WIN_WIDTH;
+	win->num_rays = WIN_WIDTH;
+	// win->playerDX = cos(win->playerA) * 5;
+	// win->playerDY = sin(win->playerA) * 5;
+	win->distance_towall = -1;
 	
-	win.mlx_ptr = mlx_init();
-	// win.f_map = one_map();
-	win.map = map_getter();
-	// map_printer(win.map);
-	win.win_ptr = mlx_new_window(win.mlx_ptr, WIN_WIDTH, WIN_HEIGHT, "CUB3D");
-	// map_draw(win, win.win_ptr, win.mlx_ptr, win.map);
-	player_render(&win, win.win_ptr, win.mlx_ptr);
-	mlx_hook(win.win_ptr, 2, 0, &key_handler, &win);
-	// mlx_key_hook(win.win_ptr, &key_release_handler, &win);
-	mlx_hook(win.win_ptr, 17, 0L, &windows_close, NULL);
-	mlx_loop(win.mlx_ptr);
+	win->mlx_ptr = mlx_init();
+	// win->f_map = one_map();
+	win->map = map_getter();
+	// map_printer(win->map);
+	win->win_ptr = mlx_new_window(win->mlx_ptr, WIN_WIDTH, WIN_HEIGHT, "CUB3D");
+	// map_draw(win, win->win_ptr, win->mlx_ptr, win->map);
+	int	h ;
+	int	w ;
+	win->wall = NULL;
+	win->wall = (t_wall *)malloc(sizeof(t_wall));
+	win->wall->x = 0;
+	win->wall->y = 0;
+	win->wall->text = mlx_xpm_file_to_image(win->mlx_ptr, "./textures/EA.xpm", &w, &h);
+	player_render(win, win->win_ptr, win->mlx_ptr);
+	mlx_hook(win->win_ptr, 2, 0, &key_handler, win);
+	// mlx_key_hook(win->win_ptr, &key_release_handler, &win);
+	mlx_hook(win->win_ptr, 17, 0L, &windows_close, NULL);
+	mlx_loop(win->mlx_ptr);
 }

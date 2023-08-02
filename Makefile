@@ -6,14 +6,14 @@
 #    By: bhazzout <bhazzout@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/07/08 22:22:17 by bhazzout          #+#    #+#              #
-#    Updated: 2023/07/30 22:17:41 by bhazzout         ###   ########.fr        #
+#    Updated: 2023/07/31 02:06:54 by bhazzout         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 
 NAME	= cub3D
 
-CFLAGS	= -Wall -Wextra -Werror #-Wuninitialized -fsanitize=address
+CFLAGS	= -Wall -Wextra -Werror -Wuninitialized -fsanitize=address
 
 RM	= rm -rf
 

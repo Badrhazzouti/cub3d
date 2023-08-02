@@ -6,7 +6,7 @@
 /*   By: bhazzout <bhazzout@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/08 22:12:42 by bhazzout          #+#    #+#             */
-/*   Updated: 2023/07/29 18:47:07 by bhazzout         ###   ########.fr       */
+/*   Updated: 2023/08/02 01:07:33 by bhazzout         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,15 +27,22 @@
 
 #define WIN_WIDTH 900
 #define WIN_HEIGHT 600
+#define	CELL_SIZE 32
 
 typedef struct	s_wallhit
 {
-	// int		vert;
-	// int		hor;
 	double	dist;
 	double	x;
 	double	y;
+	int		ver_hor;
 }	t_wallhit;
+
+typedef struct	s_wall
+{
+	int		x;
+	int		y;
+	void	*text;
+}	t_wall;
 
 typedef struct s_win
 {
@@ -56,6 +63,7 @@ typedef struct s_win
 	int			map_height;
 	// double		distance_towall_ns;
 	// double		distance_towall_eo;
+	t_wall 		*wall;
 	double		distance_towall;
 } t_win;
 
