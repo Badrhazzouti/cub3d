@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   cub3d.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jbalahce <jbalahce@student.42.fr>          +#+  +:+       +#+        */
+/*   By: bhazzout <bhazzout@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/08 22:12:33 by bhazzout          #+#    #+#             */
-/*   Updated: 2023/08/03 00:52:32 by jbalahce         ###   ########.fr       */
+/*   Updated: 2023/08/03 02:28:53 by bhazzout         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -431,28 +431,26 @@ void draw_ray(void	*mlx_ptr, void *win_ptr, double dist, double ray)
 	}
 }
 
-// void	draw_colomn_v2(t_win *win, t_wallhit *wall, t_wall *texture, void *img_ptr, int	screen_x)
-// {
-// 	double	virt_hight;
-// 	double	start;
-// 	double	repeat_pixel;
-// 	double	i;
-// 	double	j;
-// 	i = 0;
-// 	virt_hight = ((double)(win->cell_size) / wall->dist) * 450;
-// 	repeat_pixel = (virt_hight) / (win->cell_size);
-// 	j = 1 / (repeat_pixel);
-// 	start = ((double)WIN_HEIGHT / 2) - (virt_hight / 2);
-// 	texture->y = 0;
-// 	while (start <= ((double)WIN_HEIGHT / 2) + (virt_hight / 2))
-// 	{
-// 		my_put_pixel_to_image_v2(img_ptr, vars->i, start, vars->wall);
-// 		// my_put_pixel_to_image_v2(vars->img_ptr, vars->i - 1, start, vars->wall);
-// 		start++;
-// 		i += j * 10;
-// 		(vars->wall->y_text) = i;
-// 	}
-// }
+void	wall_put(t_win *win, t_wallhit *wall_hit)
+{
+	int	x;
+	int	y;
+
+	x = wall_hit->x / CELL_SIZE;
+	y = wall_hit->y / CELL_SIZE;
+	if (wall_hit->ver_hor == 1)
+		win->wall->x = (int)wall_hit->x % CELL_SIZE;
+	else
+		win->wall->x = (int)wall_hit->y % CELL_SIZE;
+	if (y < win->playerY / CELL_SIZE && wall_hit->ver_hor == 1)
+		win->wall->text = win->img->EA;
+	if (y > win->playerY / CELL_SIZE && wall_hit->ver_hor == 1)
+		win->wall->text = win->img->NO;
+	if (x > win->playerX / CELL_SIZE && wall_hit->ver_hor == 0)
+		win->wall->text = win->img->SO;
+	if (x < win->playerX / CELL_SIZE && wall_hit->ver_hor == 0)
+		win->wall->text = win->img->WE;
+}
 
 void	player_render(t_win *win, void *win_ptr, void *mlx_ptr)
 {
@@ -470,11 +468,12 @@ void	player_render(t_win *win, void *win_ptr, void *mlx_ptr)
 	double	wall_height = 0;
 	double	col = 0;
 	double	wall_screen_x = 0;
-	// img_ptr && mlx_destroy_image(mlx_ptr,img_ptr);
+	img_ptr && mlx_destroy_image(mlx_ptr,img_ptr);
 	img_ptr = mlx_new_image(mlx_ptr, WIN_WIDTH, WIN_HEIGHT);
 	win->wall->x = 0;
 	win->wall->y = 0;
 	// wall->text = NULL;
+	// wall_put(win, )
 	while (ray_temp < ray_end)
 	{
 		ray_angle = ray_temp;
@@ -482,14 +481,13 @@ void	player_render(t_win *win, void *win_ptr, void *mlx_ptr)
 		wall_hit = distance_getter(win, ray_angle);
 		wall_hit->dist *= cos(win->playerA - ray_angle);
 		wall_height = (win->cell_size / wall_hit->dist) * 450;
-		// draw_ray(mlx_ptr, win_ptr, wall_hit->dist, ray_angle);
 		double wallTop = ((double)WIN_HEIGHT / 2) - (wall_height / 2);
-		wall_screen_x = col;
     	double wallBottom = ((double)WIN_HEIGHT / 2) + (wall_height / 2);
-        mlx_draw_line(mlx_ptr, win_ptr, wall_screen_x, 0, wallTop, 0xFF00FF, win, img_ptr);
-		// mlx_draw_line(mlx_ptr, win_ptr, wall_screen_x, wallTop, wallBottom, 0xFF7575, win, img_ptr);
+		wall_screen_x = col;
+		wall_put(win, wall_hit);
+        // mlx_draw_line(mlx_ptr, win_ptr, wall_screen_x, 0, wallTop, 0xFF00FF, win, img_ptr);
 		my_mlx_draw_line(mlx_ptr, win_ptr, wall_screen_x, wallTop, wallBottom, img_ptr, win, wall_hit, win->wall);
-		mlx_draw_line(mlx_ptr, win_ptr, wall_screen_x, wallBottom, WIN_HEIGHT, 0xFF0000, win, img_ptr);
+		// mlx_draw_line(mlx_ptr, win_ptr, wall_screen_x, wallBottom, WIN_HEIGHT, 0xFF0000, win, img_ptr);
 		ray_temp += ray_incrementation;
 		col++;
 		wall_hit->dist = -1;
@@ -583,7 +581,7 @@ int	key_handler(int keycode, t_win *win)
 	}
 	// map_draw(*win, win->win_ptr, win->mlx_ptr, win->map);
 	p_update(win);
-	// mlx_clear_window(win->mlx_ptr, win->win_ptr);
+	mlx_clear_window(win->mlx_ptr, win->win_ptr);
 	player_render(win, win->win_ptr, win->mlx_ptr);
 	// key_release_handler(keycode, win);
 	return (0);
@@ -599,6 +597,8 @@ int main (int ac, char **av)
 	win = (t_win *)malloc(sizeof(t_win));
 
 	//initialize map and player's constants
+	int	w;
+	int	h;
 	win->cell_size = 32;
 	win->map_height = 11;
 	win->map_width = 25;
@@ -618,13 +618,18 @@ int main (int ac, char **av)
 	// map_printer(win->map);
 	win->win_ptr = mlx_new_window(win->mlx_ptr, WIN_WIDTH, WIN_HEIGHT, "CUB3D");
 	// map_draw(win, win->win_ptr, win->mlx_ptr, win->map);
-	int	h ;
-	int	w ;
+	// int	h ;
+	// int	w ;
 	win->wall = NULL;
 	win->wall = (t_wall *)malloc(sizeof(t_wall));
 	win->wall->x = 0;
 	win->wall->y = 0;
-	win->wall->text = mlx_xpm_file_to_image(win->mlx_ptr, "./textures/EA.xpm", &w, &h);
+	win->img = (t_image *)malloc(sizeof(t_image));
+	win->img->EA = mlx_xpm_file_to_image(win->mlx_ptr, "./textures/EA.xpm", &w, &h);
+	win->img->NO = mlx_xpm_file_to_image(win->mlx_ptr, "./textures/NO.xpm", &w, &h);
+	win->img->SO = mlx_xpm_file_to_image(win->mlx_ptr, "./textures/SO.xpm", &w, &h);
+	win->img->WE = mlx_xpm_file_to_image(win->mlx_ptr, "./textures/WE.xpm", &w, &h);
+	// win->wall->text = mlx_xpm_file_to_image(win->mlx_ptr, "./textures/EA.xpm", &w, &h);
 	player_render(win, win->win_ptr, win->mlx_ptr);
 	mlx_hook(win->win_ptr, 2, 0, &key_handler, win);
 	// mlx_key_hook(win->win_ptr, &key_release_handler, &win);

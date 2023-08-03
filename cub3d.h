@@ -6,7 +6,7 @@
 /*   By: bhazzout <bhazzout@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/08 22:12:42 by bhazzout          #+#    #+#             */
-/*   Updated: 2023/08/02 01:07:33 by bhazzout         ###   ########.fr       */
+/*   Updated: 2023/08/03 02:25:26 by bhazzout         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,14 @@ typedef struct	s_wall
 	void	*text;
 }	t_wall;
 
+typedef struct s_image
+{
+	void	*NO;
+	void	*SO;
+	void	*EA;
+	void	*WE;
+}	t_image;
+
 typedef struct s_win
 {
 	char		*f_map;
@@ -64,8 +72,10 @@ typedef struct s_win
 	// double		distance_towall_ns;
 	// double		distance_towall_eo;
 	t_wall 		*wall;
+	t_image		*img;
 	double		distance_towall;
 } t_win;
+
 
 // typedef	struct s_end_coor
 // {
