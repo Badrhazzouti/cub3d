@@ -6,7 +6,7 @@
 /*   By: bhazzout <bhazzout@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/08 22:12:33 by bhazzout          #+#    #+#             */
-/*   Updated: 2023/08/03 02:28:53 by bhazzout         ###   ########.fr       */
+/*   Updated: 2023/08/03 03:17:08 by bhazzout         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -485,9 +485,9 @@ void	player_render(t_win *win, void *win_ptr, void *mlx_ptr)
     	double wallBottom = ((double)WIN_HEIGHT / 2) + (wall_height / 2);
 		wall_screen_x = col;
 		wall_put(win, wall_hit);
-        // mlx_draw_line(mlx_ptr, win_ptr, wall_screen_x, 0, wallTop, 0xFF00FF, win, img_ptr);
+        mlx_draw_line(mlx_ptr, win_ptr, wall_screen_x, 0, wallTop, 0x0F00FF, win, img_ptr);
 		my_mlx_draw_line(mlx_ptr, win_ptr, wall_screen_x, wallTop, wallBottom, img_ptr, win, wall_hit, win->wall);
-		// mlx_draw_line(mlx_ptr, win_ptr, wall_screen_x, wallBottom, WIN_HEIGHT, 0xFF0000, win, img_ptr);
+		mlx_draw_line(mlx_ptr, win_ptr, wall_screen_x, wallBottom, WIN_HEIGHT, 0xFF00F0, win, img_ptr);
 		ray_temp += ray_incrementation;
 		col++;
 		wall_hit->dist = -1;
