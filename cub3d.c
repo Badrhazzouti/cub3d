@@ -6,7 +6,7 @@
 /*   By: bhazzout <bhazzout@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/08 22:12:33 by bhazzout          #+#    #+#             */
-/*   Updated: 2023/08/03 03:17:08 by bhazzout         ###   ########.fr       */
+/*   Updated: 2023/08/04 05:58:39 by bhazzout         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -518,24 +518,22 @@ int	key_handler(int keycode, t_win *win)
 		win->playerDY = -sin(win->playerA) * 5;
 		int	new_x = (int)((win->playerX + win->playerDX) / win->cell_size);
 		int	new_y = (int)((win->playerY + win->playerDY) / win->cell_size);
-		if (new_y > 0 && new_y < win->map_height && new_x > 0 && new_x < win->map_width && win->map[new_y][new_x] != '1')
-		{
-			win->playerX += win->playerDX;
-			win->playerY += win->playerDY;
-		}
+		if (new_x > 0 && new_x < win->map_width && win->map[win->playerY / win->cell_size][new_x] != '1')
+			win->playerX += (int)win->playerDX;
+		if (new_y > 0 && new_y < win->map_height && win->map[new_y][win->playerX / win->cell_size] != '1')
+			win->playerY += (int)win->playerDY;
 	}
 	if (keycode == 1)//S
 	{
 		// move_down = 0;
-		win->playerDX = cos(win->playerA) * 5;
-		win->playerDY = -sin(win->playerA) * 5;
-		int	new_x = (int)((win->playerX - win->playerDX) / win->cell_size);
-		int	new_y = (int)((win->playerY - win->playerDY) / win->cell_size);
-		if (new_y > 0 && new_y < win->map_height && new_x > 0 && new_x < win->map_width && win->map[new_y][new_x] != '1')
-		{
-			win->playerX -= win->playerDX;
-			win->playerY -= win->playerDY;
-		}
+		win->playerDX = cos(-(win->playerA + M_PI)) * 5;
+		win->playerDY = sin(-(win->playerA + M_PI)) * 5;
+		int	new_x = (int)((win->playerX + win->playerDX) / win->cell_size);
+		int	new_y = (int)((win->playerY + win->playerDY) / win->cell_size);
+		if (new_x > 0 && new_x < win->map_width && win->map[win->playerY / win->cell_size][new_x] != '1')
+			win->playerX += (int)win->playerDX;
+		if (new_y > 0 && new_y < win->map_height && win->map[new_y][win->playerX / win->cell_size] != '1')
+			win->playerY += (int)win->playerDY;
 	}
 	if (keycode == 0)//A
 	{
@@ -544,11 +542,10 @@ int	key_handler(int keycode, t_win *win)
 		win->playerDY = -sin(win->playerA + M_PI_2) * 5;
 		int	new_x = (int)((win->playerX - win->playerDX) / win->cell_size);
 		int	new_y = (int)((win->playerY - win->playerDY) / win->cell_size);
-		if (new_y > 0 && new_y < win->map_height && new_x > 0 && new_x < win->map_width && win->map[new_y][new_x] != '1')
-		{
-			win->playerX -= win->playerDX;
-			win->playerY -= win->playerDY;
-		}
+		if (new_x > 0 && new_x < win->map_width && win->map[win->playerY / win->cell_size][new_x] != '1')
+			win->playerX -= (int)win->playerDX;
+		if (new_y > 0 && new_y < win->map_height && win->map[new_y][win->playerX / win->cell_size] != '1')
+			win->playerY -= (int)win->playerDY;
 	}
 	if (keycode == 2)//D
 	{
@@ -557,11 +554,10 @@ int	key_handler(int keycode, t_win *win)
 		win->playerDY = -sin(win->playerA + M_PI_2) * 5;
 		int	new_x = (int)((win->playerX + win->playerDX) / win->cell_size);
 		int	new_y = (int)((win->playerY + win->playerDY) / win->cell_size);
-		if (new_y > 0 && new_y < win->map_height && new_x > 0 && new_x < win->map_width && win->map[new_y][new_x] != '1')
-		{
-			win->playerX += win->playerDX;
-			win->playerY += win->playerDY;
-		}
+		if (new_x > 0 && new_x < win->map_width && win->map[win->playerY / win->cell_size][new_x] != '1')
+			win->playerX += (int)win->playerDX;
+		if (new_y > 0 && new_y < win->map_height && win->map[new_y][win->playerX / win->cell_size] != '1')
+			win->playerY += (int)win->playerDY;
 	}
 	if (keycode == 123)//cursor left
 	{
