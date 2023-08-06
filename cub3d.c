@@ -6,7 +6,7 @@
 /*   By: bhazzout <bhazzout@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/08 22:12:33 by bhazzout          #+#    #+#             */
-/*   Updated: 2023/08/04 05:58:39 by bhazzout         ###   ########.fr       */
+/*   Updated: 2023/08/06 06:17:17 by bhazzout         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,9 @@ int	forward_speed = 5;
 int	backward_speed = -5;
 int	right_speed = 5;
 int	left_speed = -5;
+int	MAX_LOD_DISTANCE = 5000;
+double	LOD_FACTOR = 0.5;
+double	wall_flag = 0;
 
 
 int	windows_close(int keycode, void *param)
@@ -50,111 +53,6 @@ void	map_printer(char **map)
 	}
 }
 
-void	map_draw(t_win win, void *win_ptr, void *mlx_ptr, char **map)
-{
-	int	x;
-	int	y;
-	int	color;
-	int	pixel_x;
-	int	pixel_y;
-	int	i;
-	int	j;
-
-	y = 0;
-	while (y < win.map_height)
-	{
-		x = 0;
-		while (x < win.map_width)
-		{
-			if (map[y][x] == '1')
-				color = 0x000000;
-			else if (map[y][x] == '0')
-				color = 0xFFF0FF;
-			pixel_x = win.cell_size * x;
-			pixel_y = win.cell_size * y;
-			j = 0;
-			while (j < win.cell_size)
-			{
-				i = 0;
-				while (i < win.cell_size)
-				{
-					mlx_pixel_put(mlx_ptr, win_ptr, pixel_x + i, pixel_y + j, color);
-					if (i + 1 == win.cell_size)
-						mlx_pixel_put(mlx_ptr, win_ptr, pixel_x + i, pixel_y + j, 0XFF0000);
-					if (j + 1 == win.cell_size)
-						mlx_pixel_put(mlx_ptr, win_ptr, pixel_x + i, pixel_y + j, 0XFF0000);
-					i++;
-				}
-				j++;
-			}
-			x++;
-		}
-		y++;
-	}
-}
-
-void	 p_update(t_win *win)
-{
-	if (move_up == 0 || move_down == 0 || move_left == 0 || move_right == 0)
-	{
-		if (move_up == 0)
-			move_up = 1;
-		if (move_down == 0)
-			move_down = 1;
-		if (move_left == 0)
-			move_left = 1;
-		if (move_right == 0)
-			move_right = 1;
-		int	new_x = (int)((win->playerX + win->playerDX) / win->cell_size);
-		int	new_y = (int)((win->playerY + win->playerDY) / win->cell_size);
-		if (new_y > 0 && new_y < win->map_height && new_x > 0 && new_x < win->map_width && win->map[new_y][new_x] != '1')
-		{
-			win->playerX += win->playerDX;
-			win->playerY += win->playerDY;
-		}
-	}
-	if (rotate_left == 0)
-	{
-		rotate_left = 1;
-		win->playerA -= 1;
-		ray_correct(win->playerA);
-		win->playerDX = cos(win->playerA);
-		win->playerDY = sin(win->playerA);
-	}
-	if (rotate_right == 0)
-	{
-		rotate_right = 1;
-		win->playerA += 1;
-		ray_correct(win->playerA);
-		win->playerDX = cos(win->playerA);
-		win->playerDY = sin(win->playerA);
-	}
-}
-
-void	pixel_to_img(void *img_ptr, void *mlx_ptr, int x, int y, int color, void *win_ptr, t_win *win)
-{
-	(void)mlx_ptr, (void)win_ptr, (void)win;
-	int				bits_per_pixel = 0;
-	unsigned int			*img;
-	int				size_line = 0;
-	int				endian = 0;
-
-	if (x < 0 || x >= WIN_WIDTH || y < 0 || y >= WIN_HEIGHT)
-		return ;
-	img = (unsigned int *)mlx_get_data_addr(img_ptr, &bits_per_pixel, &size_line, &endian);
-	int index = ((int)y * (size_line / 4) + (int)x);
-	img[index] = color;
-}
-
-void mlx_draw_line(void *mlx_ptr, void *win_ptr, double x1, double y1, double y2, int color, t_win *win, void *img_ptr)
-{
-	while (y1 < y2)
-	{
-		pixel_to_img(img_ptr, mlx_ptr, x1, y1, color, win_ptr, win);
-		y1 += 1;
-	}
-}
-
 void	my_pixel_to_img(void *img_ptr, void *mlx_ptr, int x, int y, t_wall *wall, void *win_ptr, t_win *win)
 {
 	(void)mlx_ptr, (void)win_ptr, (void)win;
@@ -165,7 +63,7 @@ void	my_pixel_to_img(void *img_ptr, void *mlx_ptr, int x, int y, t_wall *wall, v
 	int				endian = 0;
 
 	texture = (unsigned int *)mlx_get_data_addr(wall->text, &bits_per_pixel, &size_line, &endian);
-	 int	img_index = (wall->y * (size_line / 4) + wall->x);
+	int	img_index = (wall->y * (size_line / 4) + wall->x);
 	img = (unsigned int *)mlx_get_data_addr(img_ptr, &bits_per_pixel, &size_line, &endian);
 	 int  index = (y * (size_line / 4) + x);
 	if (x < 0 || x >= WIN_WIDTH || y < 0 || y >= WIN_HEIGHT)
@@ -175,11 +73,39 @@ void	my_pixel_to_img(void *img_ptr, void *mlx_ptr, int x, int y, t_wall *wall, v
 	img[index] = texture[img_index];
 }
 
+void	mini_pixel_to_img(t_win *win, int x, int y, int color)
+{
+	int				bits_per_pixel = 0;
+	unsigned int			*img;
+	int				size_line = 0;
+	int				endian = 0;
+
+	if (x < 0 || x >= WIN_WIDTH || y < 0 || y >= WIN_HEIGHT)
+		return ;
+	img = (unsigned int *)mlx_get_data_addr(win->img_ptr, &bits_per_pixel, &size_line, &endian);
+	int index = ((int)y * (size_line / 4) + (int)x);
+	img[index] = color;
+}
+
+void	pixel_to_img(t_win *win, int x, int y)
+{
+	int				bits_per_pixel = 0;
+	unsigned int			*img;
+	int				size_line = 0;
+	int				endian = 0;
+
+	if (x < 0 || x >= WIN_WIDTH || y < 0 || y >= WIN_HEIGHT)
+		return ;
+	img = (unsigned int *)mlx_get_data_addr(win->img_ptr, &bits_per_pixel, &size_line, &endian);
+	int index = ((int)y * (size_line / 4) + (int)x);
+	img[index] = win->color;
+}
+
 void my_mlx_draw_line(void *mlx_ptr, void *win_ptr, double x1, double y1, double y2,void *img_ptr, t_win *win , t_wallhit *wallhit, t_wall *wall)
 {
 	(void)mlx_ptr, (void)win_ptr, (void)x1, (void)y1, (void)y2, (void)img_ptr, (void)wallhit, (void)win;
 	double	virt_hight;
-	double	start;
+	// double	start;
 	double	repeat_pixel;
 	double	i;
 	double	j;
@@ -188,9 +114,9 @@ void my_mlx_draw_line(void *mlx_ptr, void *win_ptr, double x1, double y1, double
 	virt_hight = ((double)(CELL_SIZE) / wallhit->dist) * 450;
 	repeat_pixel = (virt_hight) / ((double)CELL_SIZE);
 	j = 1 / (repeat_pixel);
-	start = ((double)WIN_HEIGHT / 2) - (virt_hight / 2);
+	// start = ((double)WIN_HEIGHT / 2) - (virt_hight / 2);
 	if (wallhit->ver_hor == 1)
-		wall->x = (int)(wallhit->x) % (int)CELL_SIZE;
+		wall->x = ((int)(wallhit->x) % (int)CELL_SIZE);
 	else
 		wall->x = (int)(wallhit->y) % (int)CELL_SIZE;
 	wall->y = 0;
@@ -237,21 +163,21 @@ t_wallhit	*vertical_check(t_win *win, double ray_angle, t_wallhit *ver)
 	}
 	if (M_PI_2 < ray_angle && ray_angle < M_PI)
 	{
-		ver->x = ((win->playerX / win->cell_size) * win->cell_size) - 0.0000001;
+		ver->x = ((win->playerX / win->cell_size) * win->cell_size) - 0.0001;
 		ver->y = win->playerY - ((win->playerX - ver->x) * tan(M_PI - ray_angle));
 		offset_x = -win->cell_size;
 		offset_y = -(win->cell_size * tan(M_PI - ray_angle));
 	}
 	if (ray_angle == M_PI)
 	{
-		ver->x = ((win->playerX / win->cell_size) * win->cell_size) - 0.0000001;
+		ver->x = ((win->playerX / win->cell_size) * win->cell_size) - 0.0001;
 		ver->y = win->playerY;
 		offset_x = -(win->cell_size);
 		offset_y = 0;
 	}
 	if (M_PI < ray_angle && ray_angle < (3 * M_PI) / 2)
 	{
-		ver->x = ((win->playerX / win->cell_size) * win->cell_size) - 0.0000001;
+		ver->x = ((win->playerX / win->cell_size) * win->cell_size) - 0.0001;
 		ver->y = win->playerY + ((win->playerX - ver->x) * tan(ray_angle - M_PI));
 		offset_x = -win->cell_size;
 		offset_y = win->cell_size * tan(ray_angle - M_PI);
@@ -297,12 +223,9 @@ t_wallhit	*horizontal_check(t_win *win, double ray_angle, t_wallhit *hor)
 {
 	double	offset_x = -1;
 	double	offset_y = -1;
-	// double	first_x = -1;
 	hor->x = -1;
-	// double	first_y = -1;
 	hor->y = -1;
 	
-	// double	hypothenuse = 0;
 	double	adjacent = 0;
 	double	opposite = 0;
 	if (ray_angle == 0)
@@ -312,7 +235,7 @@ t_wallhit	*horizontal_check(t_win *win, double ray_angle, t_wallhit *hor)
 	}
 	if (0 < ray_angle && ray_angle < M_PI_2)
 	{
-		hor->y = ((win->playerY / win->cell_size) * win->cell_size) - 0.0000001;
+		hor->y = ((win->playerY / win->cell_size) * win->cell_size) - 0.0001;
 		hor->x = win->playerX + ((win->playerY - hor->y)/ tan(ray_angle));
 		offset_x = win->cell_size / tan(ray_angle);
 		offset_y = -win->cell_size;
@@ -320,13 +243,13 @@ t_wallhit	*horizontal_check(t_win *win, double ray_angle, t_wallhit *hor)
 	if (ray_angle == M_PI_2)
 	{
 		hor->x = win->playerX;
-		hor->y = ((win->playerY / win->cell_size) * win->cell_size) - 0.0000001;///?
+		hor->y = ((win->playerY / win->cell_size) * win->cell_size) - 0.0001;///?
 		offset_x = 0;
 		offset_y = -win->cell_size;
 	}
 	if (M_PI_2 < ray_angle && ray_angle < M_PI)
 	{
-		hor->y = ((win->playerY / win->cell_size) * win->cell_size) - 0.0000001;
+		hor->y = ((win->playerY / win->cell_size) * win->cell_size) - 0.0001;
 		hor->x = win->playerX - ((win->playerY - hor->y) / tan(M_PI - ray_angle));
 		offset_x = -(win->cell_size / tan(M_PI - ray_angle));
 		offset_y = -win->cell_size;
@@ -452,142 +375,279 @@ void	wall_put(t_win *win, t_wallhit *wall_hit)
 		win->wall->text = win->img->WE;
 }
 
-void	player_render(t_win *win, void *win_ptr, void *mlx_ptr)
+void	floor_ceil(t_win *win, int flag)
 {
-	// win->wall = (t_wall *)malloc (sizeof(t_wall));
-	win->playerA = ray_correct(win->playerA);
+	int	y1;
+	int	x1;
+	int	y2;
 
-	t_wallhit *wall_hit;
-	
-	double	ray_incrementation = 0.00087266462;
-	double	ray_start = win->playerA - (win->fov_A / 2);
-	double	ray_end = win->playerA + (win->fov_A / 2);
-	double	ray_angle = ray_start;
-	double	ray_temp = ray_start;
-	void	*img_ptr = NULL;
-	double	wall_height = 0;
-	double	col = 0;
-	double	wall_screen_x = 0;
-	img_ptr && mlx_destroy_image(mlx_ptr,img_ptr);
-	img_ptr = mlx_new_image(mlx_ptr, WIN_WIDTH, WIN_HEIGHT);
-	win->wall->x = 0;
-	win->wall->y = 0;
-	// wall->text = NULL;
-	// wall_put(win, )
-	while (ray_temp < ray_end)
-	{
-		ray_angle = ray_temp;
-		ray_angle = ray_correct(ray_angle);
-		wall_hit = distance_getter(win, ray_angle);
-		wall_hit->dist *= cos(win->playerA - ray_angle);
-		wall_height = (win->cell_size / wall_hit->dist) * 450;
-		double wallTop = ((double)WIN_HEIGHT / 2) - (wall_height / 2);
-    	double wallBottom = ((double)WIN_HEIGHT / 2) + (wall_height / 2);
-		wall_screen_x = col;
-		wall_put(win, wall_hit);
-        mlx_draw_line(mlx_ptr, win_ptr, wall_screen_x, 0, wallTop, 0x0F00FF, win, img_ptr);
-		my_mlx_draw_line(mlx_ptr, win_ptr, wall_screen_x, wallTop, wallBottom, img_ptr, win, wall_hit, win->wall);
-		mlx_draw_line(mlx_ptr, win_ptr, wall_screen_x, wallBottom, WIN_HEIGHT, 0xFF00F0, win, img_ptr);
-		ray_temp += ray_incrementation;
-		col++;
-		wall_hit->dist = -1;
+	x1 = win->ray->wall_screen_x;
+	if (flag == 0)
+	{	
+		y1 = 0;
+		y2 = win->ray->wall_top;
+		win->color = 0x0F00FF;
 	}
-	mlx_put_image_to_window(mlx_ptr, win_ptr, img_ptr, 0, 0);
+	else
+	{
+		y1 = win->ray->wall_bottom;
+		y2 = WIN_HEIGHT;
+		win->color = 0xFF00F0;
+	}
+	while (y1 < y2)
+	{
+		pixel_to_img(win, x1, y1);
+		y1++;
+	}
 }
 
-// int	key_release_handler(int keycode, t_win *win)
-// {
-// 	(void) win;
-// 	if (keycode == 13)//W
-// 		move_up = 1;
-// 	if (keycode == 0)//A
-// 		rotate_left = 1;
-// 	if (keycode == 2)//D
-// 		rotate_right = 1;
-// 	if (keycode == 1)//S
-// 		move_down = 1;
-// 	return 0;
-// }
+void	rays_init(t_win *win)
+{
+	win->ray->ray_i = 0.00087266462;
+	win->ray->ray_start = win->playerA - (win->fov_A / 2);
+	win->ray->ray_end = win->playerA + (win->fov_A / 2);
+	win->ray->ray_angle = win->ray->ray_start;
+	win->ray->ray_temp = win->ray->ray_start;
+	win->img_ptr = NULL;
+	win->ray->wall_height = 0;
+	win->ray->col = 0;
+	win->ray->wall_screen_x = 0;
+	win->img_ptr && mlx_destroy_image(win->mlx_ptr, win->img_ptr);
+	win->img_ptr = mlx_new_image(win->mlx_ptr, WIN_WIDTH, WIN_HEIGHT);
+	win->wall->x = 0;
+	win->wall->y = 0;
+	win->playerA = ray_correct(win->playerA);
+}
+
+void	player_render(t_win *win)
+{
+	t_wallhit *wall_hit;
+	int	counter = 0;
+	
+	rays_init(win);
+	while (win->ray->ray_temp < win->ray->ray_end)
+	{
+		win->ray->ray_angle = win->ray->ray_temp;
+		win->ray->ray_angle = ray_correct(win->ray->ray_angle);
+		wall_hit = distance_getter(win, win->ray->ray_angle);
+		wall_hit->dist *= cos(win->playerA - win->ray->ray_angle);
+		win->ray->wall_height = (win->cell_size / wall_hit->dist) * 450;
+		win->ray->wall_top = ((double)WIN_HEIGHT / 2) - (win->ray->wall_height / 2);
+    	win->ray->wall_bottom = ((double)WIN_HEIGHT / 2) + (win->ray->wall_height / 2);
+		win->ray->wall_screen_x = win->ray->col;
+		if (wall_hit->dist < MAX_LOD_DISTANCE) {
+            // If the wall is far away, reduce its height to optimize rendering
+            win->ray->wall_height *= LOD_FACTOR;
+        }
+		wall_put(win, wall_hit);
+		floor_ceil(win, 1);
+		floor_ceil(win, 0);
+		my_mlx_draw_line(win->mlx_ptr, win->win_ptr, win->ray->wall_screen_x, win->ray->wall_top, win->ray->wall_bottom, win->img_ptr, win, wall_hit, win->wall);
+		win->ray->ray_temp += win->ray->ray_i;
+		win->ray->col++;
+		wall_hit->dist = -1;
+		counter++;
+	}
+	// pixel_to_img(win, WIN_WIDTH / 2, WIN_HEIGHT / 2);
+	// pixel_to_img(win, (WIN_WIDTH / 2)-1, (WIN_HEIGHT / 2)-1);
+	// pixel_to_img(win, (WIN_WIDTH / 2)-1,( WIN_HEIGHT / 2));
+	// pixel_to_img(win, WIN_WIDTH / 2, (WIN_HEIGHT / 2)-1);
+	map_draw(win);
+	mlx_put_image_to_window(win->mlx_ptr, win->win_ptr, win->img_ptr, 0, 0);
+}
+
+void	ray_draw(t_win *win, double cell_x, double cell_y)
+{
+	double x = (win->mini_x / win->cell_size) * cell_x;
+	double y = (win->mini_y / win->cell_size) * cell_y;
+	double co = cos(-win->playerA);
+	double si = sin(-win->playerA);
+	int i = 0;
+	while (i < 15)
+	{
+		mini_pixel_to_img(win,x, y , 0x00FF00);
+		x += co;
+		y += si;
+		i += 1;
+	}
+}
+
+void	map_draw(t_win *win)
+{
+	int	x;
+	int	y;
+	int	color;
+	int	pixel_x;
+	int	pixel_y;
+	int	i;
+	int	j;
+	int	mini_height = 100;
+	int	mini_width = 200;
+	double	cell_x = mini_width / win->map_width;
+	double	cell_y = mini_height / win->map_height;
+
+	y = 0;
+	while (y < win->map_height)
+	{
+		x = 0;
+		while (x < win->map_width)
+		{
+			if (win->map[y][x] == '1')
+				color = 0x000000;
+			else if (win->map[y][x] == '0')
+				color = 0xFFF0FF;
+			pixel_x = cell_x * x;
+			pixel_y = cell_y * y;
+			j = 0;
+			while (j < cell_y)
+			{
+				i = 0;
+				while (i < cell_x)
+				{
+					mini_pixel_to_img(win, pixel_x + i, pixel_y + j, color);
+					if (i + 1 == cell_x)
+						mini_pixel_to_img(win, pixel_x + i, pixel_y + j, 0X000000);
+					if (j + 1 == cell_y)
+						mini_pixel_to_img(win, pixel_x + i, pixel_y + j, 0X000000);
+					i++;
+				}
+				j++;
+			}
+			x++;
+		}
+		y++;
+	}
+	ray_draw(win, cell_x, cell_y);
+}
+
+int	key_release_handler(int keycode, t_win *win)
+{
+	(void) win;
+	if (keycode == 13)//W
+		move_up = 1;
+	if (keycode == 0)//A
+		move_left = 1;
+	if (keycode == 2)//D
+		move_right = 1;
+	if (keycode == 1)//S
+		move_down = 1;
+	if (keycode == 123)//cursor left
+		rotate_left = 1;
+	if (keycode == 124)//cursor right
+		rotate_right = 1;
+	return 0;
+}
 
 int	key_handler(int keycode, t_win *win)
 {
+	(void)win;
 	if (keycode == 13)//W
-	{
-		// move_up = 0;
-		win->playerDX = cos(win->playerA) * 5;
-		win->playerDY = -sin(win->playerA) * 5;
-		int	new_x = (int)((win->playerX + win->playerDX) / win->cell_size);
-		int	new_y = (int)((win->playerY + win->playerDY) / win->cell_size);
-		if (new_x > 0 && new_x < win->map_width && win->map[win->playerY / win->cell_size][new_x] != '1')
-			win->playerX += (int)win->playerDX;
-		if (new_y > 0 && new_y < win->map_height && win->map[new_y][win->playerX / win->cell_size] != '1')
-			win->playerY += (int)win->playerDY;
-	}
+		move_up = 0;
 	if (keycode == 1)//S
-	{
-		// move_down = 0;
-		win->playerDX = cos(-(win->playerA + M_PI)) * 5;
-		win->playerDY = sin(-(win->playerA + M_PI)) * 5;
-		int	new_x = (int)((win->playerX + win->playerDX) / win->cell_size);
-		int	new_y = (int)((win->playerY + win->playerDY) / win->cell_size);
-		if (new_x > 0 && new_x < win->map_width && win->map[win->playerY / win->cell_size][new_x] != '1')
-			win->playerX += (int)win->playerDX;
-		if (new_y > 0 && new_y < win->map_height && win->map[new_y][win->playerX / win->cell_size] != '1')
-			win->playerY += (int)win->playerDY;
-	}
+		move_down = 0;
 	if (keycode == 0)//A
-	{
-		// move_left = 0;
-		win->playerDX = cos(win->playerA + M_PI_2) * 5;
-		win->playerDY = -sin(win->playerA + M_PI_2) * 5;
-		int	new_x = (int)((win->playerX - win->playerDX) / win->cell_size);
-		int	new_y = (int)((win->playerY - win->playerDY) / win->cell_size);
-		if (new_x > 0 && new_x < win->map_width && win->map[win->playerY / win->cell_size][new_x] != '1')
-			win->playerX -= (int)win->playerDX;
-		if (new_y > 0 && new_y < win->map_height && win->map[new_y][win->playerX / win->cell_size] != '1')
-			win->playerY -= (int)win->playerDY;
-	}
+		move_left = 0;
 	if (keycode == 2)//D
-	{
-		// move_right = 0;
-		win->playerDX = cos(win->playerA + M_PI_2) * 5;
-		win->playerDY = -sin(win->playerA + M_PI_2) * 5;
-		int	new_x = (int)((win->playerX + win->playerDX) / win->cell_size);
-		int	new_y = (int)((win->playerY + win->playerDY) / win->cell_size);
-		if (new_x > 0 && new_x < win->map_width && win->map[win->playerY / win->cell_size][new_x] != '1')
-			win->playerX += (int)win->playerDX;
-		if (new_y > 0 && new_y < win->map_height && win->map[new_y][win->playerX / win->cell_size] != '1')
-			win->playerY += (int)win->playerDY;
-	}
+		move_right = 0;
 	if (keycode == 123)//cursor left
+		rotate_left = 0;
+	if (keycode == 124)//cursor right
+		rotate_right = 0;
+	return (0);
+}
+
+int	 p_update(t_win *win)
+{
+	double	playerDX = 0;
+	double	playerDY = 0;
+	if (rotate_left == 0)
 	{
-		// rotate_left = 0;
 		win->playerA -= 0.1;
 		ray_correct(win->playerA);
-		win->playerDX = cos(win->playerA);
-		win->playerDY = sin(win->playerA);
 	}
-	if (keycode == 124)//cursor right
+	if (rotate_right == 0)
 	{
-		// rotate_right = 0;
 		win->playerA += 0.1;
 		ray_correct(win->playerA);
-		win->playerDX = cos(win->playerA);
-		win->playerDY = sin(win->playerA);
 	}
-	// map_draw(*win, win->win_ptr, win->mlx_ptr, win->map);
-	p_update(win);
-	mlx_clear_window(win->mlx_ptr, win->win_ptr);
-	player_render(win, win->win_ptr, win->mlx_ptr);
-	// key_release_handler(keycode, win);
-	return (0);
+	if (move_up == 0)
+	{
+		// move_up = 1;
+		playerDX = cos(-win->playerA) * 5;
+		playerDY = sin(-win->playerA) * 5;
+		int	new_x = (int)((win->playerX + playerDX) / win->cell_size);
+		int	new_y = (int)((win->playerY + playerDY) / win->cell_size);
+		if (new_x > 0 && new_x < win->map_width && win->map[(int)win->playerY / win->cell_size][new_x] != '1')
+		{
+			win->playerX += (int)playerDX;
+			win->mini_x += (int)playerDX;
+		}
+		if (new_y > 0 && new_y < win->map_height && win->map[new_y][(int)win->playerX / win->cell_size] != '1')
+		{
+			win->playerY += (int)playerDY;
+			win->mini_y += (int)playerDY;
+		}
+	}
+	if (move_down == 0)
+	{
+		// move_down = 1;
+		playerDX = cos(-(win->playerA + M_PI)) * 5;
+		playerDY = sin(-(win->playerA + M_PI)) * 5;
+		int	new_x = (int)((win->playerX + playerDX) / win->cell_size);
+		int	new_y = (int)((win->playerY + playerDY) / win->cell_size);
+		if (new_x > 0 && new_x < win->map_width && win->map[(int)win->playerY / win->cell_size][new_x] != '1')
+		{
+			win->playerX += (int)playerDX;
+			win->mini_x += (int)playerDX;
+		}
+		if (new_y > 0 && new_y < win->map_height && win->map[new_y][(int)win->playerX / win->cell_size] != '1')
+		{
+			win->playerY += (int)playerDY;
+			win->mini_y += (int)playerDY;
+		}
+	}
+	if (move_left == 0)
+	{
+		// move_left = 1;
+		playerDX = cos(-(win->playerA - M_PI_2)) * 5;
+		playerDY = sin(-(win->playerA - M_PI_2)) * 5;
+		int	new_x = (int)((win->playerX + playerDX) / win->cell_size);
+		int	new_y = (int)((win->playerY + playerDY) / win->cell_size);
+		if (new_x > 0 && new_x < win->map_width && win->map[(int)win->playerY / win->cell_size][new_x] != '1')
+		{
+			win->playerX += (int)playerDX;
+			win->mini_x += (int)playerDX;
+		}
+		if (new_y > 0 && new_y < win->map_height && win->map[new_y][(int)win->playerX / win->cell_size] != '1')
+		{
+			win->playerY += (int)playerDY;
+			win->mini_y += (int)playerDY;
+		}
+	}
+	if (move_right == 0)
+	{
+		// move_right = 1;
+		playerDX = cos(-(win->playerA + M_PI_2)) * 5;
+		playerDY = sin(-(win->playerA + M_PI_2)) * 5;
+		int	new_x = (int)((win->playerX + playerDX) / win->cell_size);
+		int	new_y = (int)((win->playerY + playerDY) / win->cell_size);
+		if (new_x > 0 && new_x < win->map_width && win->map[(int)win->playerY / win->cell_size][new_x] != '1')
+		{
+			win->playerX += (int)playerDX;
+			win->mini_x += (int)playerDX;
+		}
+		if (new_y > 0 && new_y < win->map_height && win->map[new_y][(int)win->playerX / win->cell_size] != '1')
+		{
+			win->playerY += (int)playerDY;
+			win->mini_y += (int)playerDY;
+		}
+	}
+	player_render(win);
+	return (1);
 }
 
 int main (int ac, char **av)
 {
-	// void	*mlx_ptr;
-	// void	*win_ptr;
-	// char	**map;
 	(void) av, (void) ac;
 	t_win *win;
 	win = (t_win *)malloc(sizeof(t_win));
@@ -600,12 +660,12 @@ int main (int ac, char **av)
 	win->map_width = 25;
 	win->playerX = 4.5 * 32;
 	win->playerY = 4.5 * 32;
+	win->mini_x = 4.5 * 32;
+	win->mini_y = 4.5 * 32;
 	win->playerA = M_PI / 2;
 	win->fov_A = (M_PI / 3);
 	win->rays_A = WIN_WIDTH;
 	win->num_rays = WIN_WIDTH;
-	// win->playerDX = cos(win->playerA) * 5;
-	// win->playerDY = sin(win->playerA) * 5;
 	win->distance_towall = -1;
 	
 	win->mlx_ptr = mlx_init();
@@ -613,7 +673,7 @@ int main (int ac, char **av)
 	win->map = map_getter();
 	// map_printer(win->map);
 	win->win_ptr = mlx_new_window(win->mlx_ptr, WIN_WIDTH, WIN_HEIGHT, "CUB3D");
-	// map_draw(win, win->win_ptr, win->mlx_ptr, win->map);
+	// map_draw(win);
 	// int	h ;
 	// int	w ;
 	win->wall = NULL;
@@ -626,9 +686,11 @@ int main (int ac, char **av)
 	win->img->SO = mlx_xpm_file_to_image(win->mlx_ptr, "./textures/SO.xpm", &w, &h);
 	win->img->WE = mlx_xpm_file_to_image(win->mlx_ptr, "./textures/WE.xpm", &w, &h);
 	// win->wall->text = mlx_xpm_file_to_image(win->mlx_ptr, "./textures/EA.xpm", &w, &h);
-	player_render(win, win->win_ptr, win->mlx_ptr);
-	mlx_hook(win->win_ptr, 2, 0, &key_handler, win);
-	// mlx_key_hook(win->win_ptr, &key_release_handler, &win);
+	win->ray = (t_ray *)malloc (sizeof(t_ray));
+	player_render(win);
+	mlx_hook(win->win_ptr, 2, 0, key_handler, win);
+	mlx_hook(win->win_ptr, 3, 0, key_release_handler, &win);
+	mlx_loop_hook(win->mlx_ptr, p_update, win);
 	mlx_hook(win->win_ptr, 17, 0L, &windows_close, NULL);
 	mlx_loop(win->mlx_ptr);
 }

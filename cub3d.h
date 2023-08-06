@@ -6,7 +6,7 @@
 /*   By: bhazzout <bhazzout@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/08 22:12:42 by bhazzout          #+#    #+#             */
-/*   Updated: 2023/08/03 02:25:26 by bhazzout         ###   ########.fr       */
+/*   Updated: 2023/08/06 05:48:25 by bhazzout         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,13 @@ typedef struct	s_wallhit
 	int		ver_hor;
 }	t_wallhit;
 
+typedef struct s_mini
+{
+	int	i;
+	int	j;
+}	t_mini;
+
+
 typedef struct	s_wall
 {
 	int		x;
@@ -52,14 +59,32 @@ typedef struct s_image
 	void	*WE;
 }	t_image;
 
+typedef struct s_ray
+{
+	double	ray_i;
+	double	ray_start;
+	double	ray_end;
+	double	ray_angle;
+	double	ray_temp;
+	double	wall_height;
+	double	wall_screen_x;
+	double	wall_top;
+	double	wall_bottom;
+	double	col;
+}	t_ray;
+
+
 typedef struct s_win
 {
+	void		*img_ptr;
 	char		*f_map;
 	char		**map;
 	void		*mlx_ptr;
 	void		*win_ptr;
 	int			playerX;
 	int			playerY;
+	double		mini_x;
+	double		mini_y;
 	double		playerDX;
 	double		playerDY;
 	double		playerA;
@@ -69,20 +94,12 @@ typedef struct s_win
 	int			cell_size;
 	int			map_width;
 	int			map_height;
-	// double		distance_towall_ns;
-	// double		distance_towall_eo;
 	t_wall 		*wall;
 	t_image		*img;
+	t_ray		*ray;
 	double		distance_towall;
+	int			color;
 } t_win;
-
-
-// typedef	struct s_end_coor
-// {
-// 	double	rayX;
-// 	double	rayY;
-// }	t_coor;
-
 
 char	*get_next_line(int fd);
 
@@ -100,5 +117,6 @@ void	*freeini(char **string, int len);
 char	**ft_split(const char *s, char sep);
 void	ft_bzero(void *s, size_t n);
 void	*ft_calloc(size_t count, size_t size);
+void	map_draw(t_win *win);
 
 #endif
