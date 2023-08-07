@@ -6,7 +6,7 @@
 /*   By: bhazzout <bhazzout@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/08 22:12:42 by bhazzout          #+#    #+#             */
-/*   Updated: 2023/08/07 02:20:16 by bhazzout         ###   ########.fr       */
+/*   Updated: 2023/08/07 05:20:40 by bhazzout         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,10 +39,13 @@ typedef struct	s_wallhit
 
 typedef struct s_mini
 {
-	int	i;
-	int	j;
+	int		i;
+	int		j;
+	int		pixel_x;
+	int		pixel_y;
+	double	cell_x;
+	double	cell_y;
 }	t_mini;
-
 
 typedef struct	s_wall
 {

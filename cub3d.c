@@ -6,7 +6,7 @@
 /*   By: bhazzout <bhazzout@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/08 22:12:33 by bhazzout          #+#    #+#             */
-/*   Updated: 2023/08/07 02:40:08 by bhazzout         ###   ########.fr       */
+/*   Updated: 2023/08/07 05:20:54 by bhazzout         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,8 @@ int	left_speed = -5;
 int	MAX_LOD_DISTANCE = 5000;
 double	LOD_FACTOR = 0.5;
 double	wall_flag = 0;
+int	mini_height = 200;
+int	mini_width = 300;
 
 
 int	windows_close(int keycode, void *param)
@@ -444,10 +446,6 @@ void	player_render(t_win *win)
 		wall_hit->dist = -1;
 		counter++;
 	}
-	// pixel_to_img(win, WIN_WIDTH / 2, WIN_HEIGHT / 2);
-	// pixel_to_img(win, (WIN_WIDTH / 2)-1, (WIN_HEIGHT / 2)-1);
-	// pixel_to_img(win, (WIN_WIDTH / 2)-1,( WIN_HEIGHT / 2));
-	// pixel_to_img(win, WIN_WIDTH / 2, (WIN_HEIGHT / 2)-1);
 	map_draw(win);
 	mlx_put_image_to_window(win->mlx_ptr, win->win_ptr, win->img_ptr, 0, 0);
 }
@@ -486,19 +484,44 @@ void	ray_draw(t_win *win, double cell_x, double cell_y)
 	}
 }
 
+void	cells_draw(t_win *win, t_mini *m_map, int color)
+{
+	int	i;
+	int	j;
+
+	j = 0;
+	while (j < m_map->cell_y)
+	{
+		i = 0;
+		while (i < m_map->cell_x)
+		{
+			if (color != 0xFFF0FF)
+				mini_pixel_to_img(win, m_map->pixel_x + i, m_map->pixel_y + j, color);
+				
+			if (i + 1 == m_map->cell_x)
+				mini_pixel_to_img(win, m_map->pixel_x + i, m_map->pixel_y + j, 0X000000);
+			if (j + 1 == m_map->cell_y)
+				mini_pixel_to_img(win, m_map->pixel_x + i, m_map->pixel_y + j, 0X000000);
+			i++;
+		}
+		j++;
+	}
+}
+
 void	map_draw(t_win *win)
 {
 	int	x;
 	int	y;
 	int	color;
-	int	pixel_x;
-	int	pixel_y;
-	int	i;
-	int	j;
-	int	mini_height = 200;
-	int	mini_width = 300;
-	double	cell_x = mini_width / win->map_width;
-	double	cell_y = mini_height / win->map_height;
+	// int	i;
+	// int	j;
+	t_mini	m_map;
+	// int	mini_height = 200;
+	// int	mini_width = 300;
+
+	m_map.cell_x = mini_width / win->map_width;
+
+	m_map.cell_y = mini_height / win->map_height;
 
 	y = 0;
 	while (y < win->map_height)
@@ -510,30 +533,31 @@ void	map_draw(t_win *win)
 				color = 0x000000;
 			else if (win->map[y][x] == '0')
 				color = 0xFFF0FF;
-			pixel_x = cell_x * x;
-			pixel_y = cell_y * y;
-			j = 0;
-			while (j < cell_y)
-			{
-				i = 0;
-				while (i < cell_x)
-				{
-					if (color != 0xFFF0FF)
-						mini_pixel_to_img(win, pixel_x + i, pixel_y + j, color);
+			m_map.pixel_x = m_map.cell_x * x;
+			m_map.pixel_y = m_map.cell_y * y;
+			cells_draw(win, &m_map, color);
+			// j = 0;
+			// while (j < cell_y)
+			// {
+			// 	i = 0;
+			// 	while (i < cell_x)
+			// 	{
+			// 		if (color != 0xFFF0FF)
+			// 			mini_pixel_to_img(win, pixel_x + i, pixel_y + j, color);
 						
-					if (i + 1 == cell_x)
-						mini_pixel_to_img(win, pixel_x + i, pixel_y + j, 0X000000);
-					if (j + 1 == cell_y)
-						mini_pixel_to_img(win, pixel_x + i, pixel_y + j, 0X000000);
-					i++;
-				}
-				j++;
-			}
+			// 		if (i + 1 == cell_x)
+			// 			mini_pixel_to_img(win, pixel_x + i, pixel_y + j, 0X000000);
+			// 		if (j + 1 == cell_y)
+			// 			mini_pixel_to_img(win, pixel_x + i, pixel_y + j, 0X000000);
+			// 		i++;
+			// 	}
+			// 	j++;
+			// }
 			x++;
 		}
 		y++;
 	}
-	ray_draw(win, cell_x, cell_y);
+	ray_draw(win, m_map.cell_x, m_map.cell_y);
 }
 
 int	key_release_handler(int keycode, t_win *win)
@@ -590,21 +614,8 @@ void	x_y_update(t_win *win, double playerDX, double playerDY)
 	}
 }
 
-int	 p_update(t_win *win)
+void	move_update(t_win *win, double playerDX, double playerDY)
 {
-	double	playerDX;
-	double	playerDY;
-
-	if (rotate_left == 0)
-	{
-		win->playerA -= 0.1;
-		ray_correct(win->playerA);
-	}
-	if (rotate_right == 0)
-	{
-		win->playerA += 0.1;
-		ray_correct(win->playerA);
-	}
 	if (move_up == 0)
 	{
 		playerDX = cos(-win->playerA);
@@ -629,6 +640,26 @@ int	 p_update(t_win *win)
 		playerDY = sin(-win->playerA - M_PI_2);
 		x_y_update(win, playerDX, playerDY);
 	}
+}
+
+int	 p_update(t_win *win)
+{
+	double	playerDX;
+	double	playerDY;
+
+	playerDX = 0;
+	playerDY = 0;
+	if (rotate_left == 0)
+	{
+		win->playerA -= 0.1;
+		ray_correct(win->playerA);
+	}
+	if (rotate_right == 0)
+	{
+		win->playerA += 0.1;
+		ray_correct(win->playerA);
+	}
+	move_update(win, playerDX, playerDY);
 	player_render(win);
 	return (1);
 }
