@@ -6,7 +6,7 @@
 /*   By: bhazzout <bhazzout@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/08 22:12:42 by bhazzout          #+#    #+#             */
-/*   Updated: 2023/08/06 05:48:25 by bhazzout         ###   ########.fr       */
+/*   Updated: 2023/08/07 02:20:16 by bhazzout         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,7 +73,6 @@ typedef struct s_ray
 	double	col;
 }	t_ray;
 
-
 typedef struct s_win
 {
 	void		*img_ptr;
@@ -94,9 +93,9 @@ typedef struct s_win
 	int			cell_size;
 	int			map_width;
 	int			map_height;
-	t_wall 		*wall;
-	t_image		*img;
-	t_ray		*ray;
+	t_wall 		wall;
+	t_image		img;
+	t_ray		ray;
 	double		distance_towall;
 	int			color;
 } t_win;
