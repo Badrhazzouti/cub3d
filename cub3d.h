@@ -6,7 +6,7 @@
 /*   By: bhazzout <bhazzout@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/08 22:12:42 by bhazzout          #+#    #+#             */
-/*   Updated: 2023/08/07 05:20:40 by bhazzout         ###   ########.fr       */
+/*   Updated: 2023/08/07 06:22:19 by bhazzout         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,20 @@
 #define WIN_WIDTH 900
 #define WIN_HEIGHT 600
 #define	CELL_SIZE 32
+
+typedef struct s_sqr
+{
+	double x;
+	double y;
+	double co;
+	double si;
+	int i;
+	int	j;
+	int	x_i;
+	int	m_y;
+	int	m_x;
+}	t_sqr;
+
 
 typedef struct	s_wallhit
 {

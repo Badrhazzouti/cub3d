@@ -6,7 +6,7 @@
 /*   By: bhazzout <bhazzout@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/08 22:12:33 by bhazzout          #+#    #+#             */
-/*   Updated: 2023/08/07 05:20:54 by bhazzout         ###   ########.fr       */
+/*   Updated: 2023/08/07 07:07:38 by bhazzout         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,18 +55,21 @@ void	map_printer(char **map)
 	}
 }
 
-void	my_pixel_to_img(void *img_ptr, void *mlx_ptr, int x, int y, void *win_ptr, t_win *win)
+void	my_pixel_to_img(t_win *win)
 {
-	(void)mlx_ptr, (void)win_ptr, (void)win;
+	int				x;
+	int				y;
 	unsigned int	*img;
 	unsigned int	*texture;
 	int				bits_per_pixel = 0;
 	int				size_line = 0;
 	int				endian = 0;
 
+	x = (int)win->ray.wall_screen_x;
+	y = (int)win->ray.wall_top;
 	texture = (unsigned int *)mlx_get_data_addr(win->wall.text, &bits_per_pixel, &size_line, &endian);
 	int	img_index = (win->wall.y * (size_line / 4) + win->wall.x);
-	img = (unsigned int *)mlx_get_data_addr(img_ptr, &bits_per_pixel, &size_line, &endian);
+	img = (unsigned int *)mlx_get_data_addr(win->img_ptr, &bits_per_pixel, &size_line, &endian);
 	 int  index = (y * (size_line / 4) + x);
 	if (x < 0 || x >= WIN_WIDTH || y < 0 || y >= WIN_HEIGHT)
 		return ;
@@ -103,11 +106,9 @@ void	pixel_to_img(t_win *win, int x, int y)
 	img[index] = win->color;
 }
 
-void my_mlx_draw_line(void *mlx_ptr, void *win_ptr, double x1, double y1, double y2,void *img_ptr, t_win *win , t_wallhit *wallhit)
+void my_mlx_draw_line(t_win *win , t_wallhit *wallhit)
 {
-	(void)mlx_ptr, (void)win_ptr, (void)x1, (void)y1, (void)y2, (void)img_ptr, (void)wallhit, (void)win;
 	double	virt_hight;
-	// double	start;
 	double	repeat_pixel;
 	double	i;
 	double	j;
@@ -116,16 +117,15 @@ void my_mlx_draw_line(void *mlx_ptr, void *win_ptr, double x1, double y1, double
 	virt_hight = ((double)(CELL_SIZE) / wallhit->dist) * 450;
 	repeat_pixel = (virt_hight) / ((double)CELL_SIZE);
 	j = 1 / (repeat_pixel);
-	// start = ((double)WIN_HEIGHT / 2) - (virt_hight / 2);
 	if (wallhit->ver_hor == 1)
 		win->wall.x = ((int)(wallhit->x) % (int)CELL_SIZE);
 	else
 		win->wall.x = (int)(wallhit->y) % (int)CELL_SIZE;
 	win->wall.y = 0;
-	while (y1 < y2)
+	while (win->ray.wall_top < win->ray.wall_bottom)
 	{
-		my_pixel_to_img(img_ptr, mlx_ptr, x1, y1, win_ptr, win);
-		y1 += 1;
+		my_pixel_to_img(win);
+		win->ray.wall_top += 1;
 		i += j * 10;
 		win->wall.y = i;
 	}
@@ -440,7 +440,8 @@ void	player_render(t_win *win)
 		wall_put(win, wall_hit);
 		floor_ceil(win, 1);
 		floor_ceil(win, 0);
-		my_mlx_draw_line(win->mlx_ptr, win->win_ptr, win->ray.wall_screen_x, win->ray.wall_top, win->ray.wall_bottom, win->img_ptr, win, wall_hit);
+		// my_mlx_draw_line(win->mlx_ptr, win->win_ptr, win->ray.wall_screen_x, win->ray.wall_top, win->ray.wall_bottom, win->img_ptr, win, wall_hit);
+		my_mlx_draw_line(win, wall_hit);
 		win->ray.ray_temp += win->ray.ray_i;
 		win->ray.col++;
 		wall_hit->dist = -1;
@@ -450,37 +451,44 @@ void	player_render(t_win *win)
 	mlx_put_image_to_window(win->mlx_ptr, win->win_ptr, win->img_ptr, 0, 0);
 }
 
-void	ray_draw(t_win *win, double cell_x, double cell_y)
+void	sqr_init(t_sqr *ray_sqr, t_win *win, t_mini *m_map)
 {
-	double x = (win->mini_x / win->cell_size) * cell_x;
-	double y = (win->mini_y / win->cell_size) * cell_y;
-	double co = cos(-win->playerA);
-	double si = sin(-win->playerA);
-	int i = 0;
-	int	j = 1;
-	int	x_i = 1;
-	int	m_y = 0;
-	int	m_x = 0;
-	while (i < 20)
+	ray_sqr->x = (win->mini_x / win->cell_size) * m_map->cell_x;
+	ray_sqr->y = (win->mini_y / win->cell_size) * m_map->cell_y;
+	ray_sqr->co = cos(-win->playerA);
+	ray_sqr->si = sin(-win->playerA);
+	ray_sqr->i = 0;
+	ray_sqr->j = 1;
+	ray_sqr->x_i = 1;
+	ray_sqr->m_y = 0;
+	ray_sqr->m_x = 0;
+}
+
+void	ray_draw(t_win *win, t_mini	*m_map)
+{
+	t_sqr	ray_sqr;
+
+	sqr_init(&ray_sqr, win, m_map);
+	while (ray_sqr.i < 20)
 	{
-		if (i == 0)
+		if (ray_sqr.i == 0)
 		{
-			m_y = y - 3;
-			while (m_y < y + 3)
+			ray_sqr.m_y = ray_sqr.y - 3;
+			while (ray_sqr.m_y < ray_sqr.y + 3)
 			{
-				m_x = x - 3;
-				while (m_x < x + 3)
+				ray_sqr.m_x = ray_sqr.x - 3;
+				while (ray_sqr.m_x < ray_sqr.x + 3)
 				{
-					mini_pixel_to_img(win, m_x, m_y, 0xFFF0FF);
-					m_x += x_i;
+					mini_pixel_to_img(win, ray_sqr.m_x, ray_sqr.m_y, 0xFFF0FF);
+					ray_sqr.m_x += ray_sqr.x_i;
 				}
-				m_y += j;
+				ray_sqr.m_y += ray_sqr.j;
 			}
 		}
-		mini_pixel_to_img(win,x, y , 0x00FF00);
-		x += co;
-		y += si;
-		i += 1;
+		mini_pixel_to_img(win,ray_sqr.x, ray_sqr.y , 0x00FF00);
+		ray_sqr.x += ray_sqr.co;
+		ray_sqr.y += ray_sqr.si;
+		ray_sqr.i += 1;
 	}
 }
 
@@ -497,7 +505,6 @@ void	cells_draw(t_win *win, t_mini *m_map, int color)
 		{
 			if (color != 0xFFF0FF)
 				mini_pixel_to_img(win, m_map->pixel_x + i, m_map->pixel_y + j, color);
-				
 			if (i + 1 == m_map->cell_x)
 				mini_pixel_to_img(win, m_map->pixel_x + i, m_map->pixel_y + j, 0X000000);
 			if (j + 1 == m_map->cell_y)
@@ -513,16 +520,9 @@ void	map_draw(t_win *win)
 	int	x;
 	int	y;
 	int	color;
-	// int	i;
-	// int	j;
 	t_mini	m_map;
-	// int	mini_height = 200;
-	// int	mini_width = 300;
-
 	m_map.cell_x = mini_width / win->map_width;
-
 	m_map.cell_y = mini_height / win->map_height;
-
 	y = 0;
 	while (y < win->map_height)
 	{
@@ -536,28 +536,11 @@ void	map_draw(t_win *win)
 			m_map.pixel_x = m_map.cell_x * x;
 			m_map.pixel_y = m_map.cell_y * y;
 			cells_draw(win, &m_map, color);
-			// j = 0;
-			// while (j < cell_y)
-			// {
-			// 	i = 0;
-			// 	while (i < cell_x)
-			// 	{
-			// 		if (color != 0xFFF0FF)
-			// 			mini_pixel_to_img(win, pixel_x + i, pixel_y + j, color);
-						
-			// 		if (i + 1 == cell_x)
-			// 			mini_pixel_to_img(win, pixel_x + i, pixel_y + j, 0X000000);
-			// 		if (j + 1 == cell_y)
-			// 			mini_pixel_to_img(win, pixel_x + i, pixel_y + j, 0X000000);
-			// 		i++;
-			// 	}
-			// 	j++;
-			// }
 			x++;
 		}
 		y++;
 	}
-	ray_draw(win, m_map.cell_x, m_map.cell_y);
+	ray_draw(win, &m_map);
 }
 
 int	key_release_handler(int keycode, t_win *win)
