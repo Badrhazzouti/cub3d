@@ -6,57 +6,61 @@
 /*   By: bhazzout <bhazzout@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/08 22:12:42 by bhazzout          #+#    #+#             */
-/*   Updated: 2023/08/08 02:04:19 by bhazzout         ###   ########.fr       */
+/*   Updated: 2023/08/08 04:50:33 by bhazzout         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef CUB3D
-#define CUB3D
+#ifndef CUB3D_H
+# define CUB3D_H
 
-#include <mlx.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <math.h>
+# include <mlx.h>
+# include <stdlib.h>
+# include <stdio.h>
+# include <unistd.h>
+# include <sys/stat.h>
+# include <fcntl.h>
+# include <math.h>
 
 # ifndef BUFFER_SIZE
 #  define BUFFER_SIZE 10
 # endif
 
-#define WIN_WIDTH 900
-#define WIN_HEIGHT 600
-#define	CELL_SIZE 32
+# define WIN_WIDTH 900
+# define WIN_HEIGHT 600
+# define CELL_SIZE 32
 
 typedef struct s_sqr
 {
-	double x;
-	double y;
-	double co;
-	double si;
-	int i;
-	int	j;
-	int	x_i;
-	int	m_y;
-	int	m_x;
+	double	x;
+	double	y;
+	double	co;
+	double	si;
+	int		i;
+	int		j;
+	int		x_i;
+	int		m_y;
+	int		m_x;
 }	t_sqr;
 
-typedef	struct s_img
+typedef struct s_hit
+{
+	double	offset_x;
+	double	offset_y;
+	double	adjacent;
+	double	opposite;
+}	t_hit;
+
+typedef struct s_img
 {
 	int				x;
 	int				y;
 	unsigned int	*img;
 	unsigned int	*texture;
-	int				bits_per_pixel;
-	int				size_line;
-	int				endian;
 	int				img_index;
 	int				index;
 }	t_img;
 
-
-typedef struct	s_wallhit
+typedef struct s_wallhit
 {
 	double	dist;
 	double	x;
@@ -74,7 +78,7 @@ typedef struct s_mini
 	double	cell_y;
 }	t_mini;
 
-typedef struct	s_wall
+typedef struct s_wall
 {
 	int		x;
 	int		y;
@@ -83,10 +87,10 @@ typedef struct	s_wall
 
 typedef struct s_image
 {
-	void	*NO;
-	void	*SO;
-	void	*EA;
-	void	*WE;
+	void	*no;
+	void	*so;
+	void	*ea;
+	void	*we;
 }	t_image;
 
 typedef struct s_ray
@@ -110,25 +114,25 @@ typedef struct s_win
 	char		**map;
 	void		*mlx_ptr;
 	void		*win_ptr;
-	int			playerX;
-	int			playerY;
+	int			playerx;
+	int			playery;
 	double		mini_x;
 	double		mini_y;
-	double		playerDX;
-	double		playerDY;
-	double		playerA;
-	double		fov_A;
-	double		rays_A;
+	double		playerdx;
+	double		playerdy;
+	double		player_a;
+	double		fov_a;
+	double		rays_a;
 	int			num_rays;
 	int			cell_size;
 	int			map_width;
 	int			map_height;
-	t_wall 		wall;
+	t_wall		wall;
 	t_image		img;
 	t_ray		ray;
 	double		distance_towall;
 	int			color;
-} t_win;
+}	t_win;
 
 char	*get_next_line(int fd);
 
