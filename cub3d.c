@@ -6,7 +6,7 @@
 /*   By: bhazzout <bhazzout@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/08 22:12:33 by bhazzout          #+#    #+#             */
-/*   Updated: 2023/08/07 07:07:38 by bhazzout         ###   ########.fr       */
+/*   Updated: 2023/08/08 02:04:22 by bhazzout         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,13 +28,11 @@ double	wall_flag = 0;
 int	mini_height = 200;
 int	mini_width = 300;
 
-
 int	windows_close(int keycode, void *param)
 {
 	(void) keycode, (void) param;
 	exit (0);
 }
-
 
 double	ray_correct(double ray_angle)
 {
@@ -47,7 +45,9 @@ double	ray_correct(double ray_angle)
 
 void	map_printer(char **map)
 {
-	int	i = 0;
+	int	i;
+
+	i = 0;
 	while (map[i])
 	{
 		printf("%s\n", map[i]);
@@ -57,23 +57,31 @@ void	map_printer(char **map)
 
 void	my_pixel_to_img(t_win *win)
 {
-	int				x;
-	int				y;
-	unsigned int	*img;
-	unsigned int	*texture;
-	int				bits_per_pixel = 0;
-	int				size_line = 0;
-	int				endian = 0;
+	// int				x;
+	// int				y;
+	// unsigned int	*img;
+	// unsigned int	*texture;
+	// int				bits_per_pixel;
+	// int				size_line;
+	// int				endian;
+	// int				img_index;
+	// int				index;
 
+	bits_per_pixel = 0;
+	size_line = 0;
+	endian = 0;
 	x = (int)win->ray.wall_screen_x;
 	y = (int)win->ray.wall_top;
-	texture = (unsigned int *)mlx_get_data_addr(win->wall.text, &bits_per_pixel, &size_line, &endian);
-	int	img_index = (win->wall.y * (size_line / 4) + win->wall.x);
-	img = (unsigned int *)mlx_get_data_addr(win->img_ptr, &bits_per_pixel, &size_line, &endian);
-	 int  index = (y * (size_line / 4) + x);
+	texture = (unsigned int *)mlx_get_data_addr(win->wall.text, \
+		&bits_per_pixel, &size_line, &endian);
+	img_index = (win->wall.y * (size_line / 4) + win->wall.x);
+	img = (unsigned int *)mlx_get_data_addr(win->img_ptr, \
+		&bits_per_pixel, &size_line, &endian);
+	index = (y * (size_line / 4) + x);
 	if (x < 0 || x >= WIN_WIDTH || y < 0 || y >= WIN_HEIGHT)
 		return ;
-	if (win->wall.x < 0 || win->wall.x >= CELL_SIZE || win->wall.y < 0 || win->wall.y >= CELL_SIZE * 10)
+	if (win->wall.x < 0 || win->wall.x >= CELL_SIZE || \
+		win->wall.y < 0 || win->wall.y >= CELL_SIZE * 10)
 		return ;
 	img[index] = texture[img_index];
 }
@@ -131,7 +139,7 @@ void my_mlx_draw_line(t_win *win , t_wallhit *wallhit)
 	}
 }
 
-t_wallhit	*vertical_check(t_win *win, double ray_angle, t_wallhit *ver)
+t_wallhit	vertical_check(t_win *win, double ray_angle, t_wallhit *ver)
 {
 	// t_wallhit 	ver;
 	double	offset_x = -1;
@@ -161,7 +169,7 @@ t_wallhit	*vertical_check(t_win *win, double ray_angle, t_wallhit *ver)
 	if (ray_angle == M_PI_2)
 	{
 		ver->dist = -1;
-		return (ver);
+		return (*ver);
 	}
 	if (M_PI_2 < ray_angle && ray_angle < M_PI)
 	{
@@ -187,7 +195,7 @@ t_wallhit	*vertical_check(t_win *win, double ray_angle, t_wallhit *ver)
 	if (ray_angle == (3 * M_PI) / 2)
 	{
 		ver->dist = -1;
-		return (ver);
+		return (*ver);
 	}
 	if ((3 * M_PI) / 2 < ray_angle && ray_angle < (2 * M_PI))
 	{
@@ -199,7 +207,7 @@ t_wallhit	*vertical_check(t_win *win, double ray_angle, t_wallhit *ver)
 	if (ver->x < 0 || ver->y < 0)
 	{
 		ver->dist = -1;
-		return (ver);
+		return (*ver);
 	}
 	char map_value;
 	while (ver->x != -1 && (int)ver->y / win->cell_size < win->map_height
@@ -218,10 +226,10 @@ t_wallhit	*vertical_check(t_win *win, double ray_angle, t_wallhit *ver)
 	adjacent = win->playerX - ver->x;
 	ver->dist = sqrt(pow(adjacent, 2) + pow(opposite, 2));//hypothenuse
 	ver->ver_hor = 0;
-	return (ver);
+	return (*ver);
 }
 
-t_wallhit	*horizontal_check(t_win *win, double ray_angle, t_wallhit *hor)
+t_wallhit	horizontal_check(t_win *win, double ray_angle, t_wallhit *hor)
 {
 	double	offset_x = -1;
 	double	offset_y = -1;
@@ -233,7 +241,7 @@ t_wallhit	*horizontal_check(t_win *win, double ray_angle, t_wallhit *hor)
 	if (ray_angle == 0)
 	{
 		hor->dist = -1;
-		return (hor);
+		return (*hor);
 	}
 	if (0 < ray_angle && ray_angle < M_PI_2)
 	{
@@ -259,7 +267,7 @@ t_wallhit	*horizontal_check(t_win *win, double ray_angle, t_wallhit *hor)
 	if (ray_angle == M_PI)
 	{
 		hor->dist = -1;
-		return (hor);
+		return (*hor);
 	}
 	if (M_PI < ray_angle && ray_angle < (3 * M_PI) / 2)
 	{
@@ -285,7 +293,7 @@ t_wallhit	*horizontal_check(t_win *win, double ray_angle, t_wallhit *hor)
 	if (hor->x == -1 || hor->y == -1)
 	{
 		hor->dist = -1;
-		return (hor);
+		return (*hor);
 	}
 	char map_value;
 	while (hor->x != -1 && (size_t)(hor->x)
@@ -302,40 +310,40 @@ t_wallhit	*horizontal_check(t_win *win, double ray_angle, t_wallhit *hor)
 	adjacent = win->playerX - hor->x;
 	hor->dist = sqrt(pow(adjacent, 2) + pow(opposite, 2));//hypothenuse
 	hor->ver_hor = 1;
-	return (hor);
+	return (*hor);
 }
 
-t_wallhit	*distance_getter(t_win *win, double ray_angle)
+t_wallhit	distance_getter(t_win *win, double ray_angle)
 {
-	t_wallhit *ver = (t_wallhit *)malloc(sizeof (t_wallhit));
-	t_wallhit *hor = (t_wallhit *)malloc(sizeof (t_wallhit));
+	t_wallhit ver;// = (t_wallhit *)malloc(sizeof (t_wallhit));
+	t_wallhit hor;// = (t_wallhit *)malloc(sizeof (t_wallhit));
 
-	ver = vertical_check(win, ray_angle, ver);
-	hor = horizontal_check(win, ray_angle, hor);
-	if (ver->dist < 0)
+	ver = vertical_check(win, ray_angle, &ver);
+	hor = horizontal_check(win, ray_angle, &hor);
+	if (ver.dist < 0)
 	{
-		free(ver);
+		// free(ver);
 		return (hor);
 	}
-	else if (hor->dist < 0)
+	else if (hor.dist < 0)
 	{
-		free(hor);
+		// free(hor);
 		return (ver);
 	}
-	else if (ver->dist < hor->dist)
+	else if (ver.dist < hor.dist)
 	{
-		free(hor);
+		// free(hor);
 		return (ver);
 	}
-	else if (ver->dist >= hor->dist)
+	else if (ver.dist >= hor.dist)
 	{
-		free(ver);
+		// free(ver);
 		return (hor);
 	}
 	else
 	{
-		free(hor);
-		ver->dist = -1;
+		// free(hor);
+		ver.dist = -1;
 		return(ver);
 	}
 }
@@ -423,7 +431,7 @@ void	rays_init(t_win *win)
 
 void	player_render(t_win *win)
 {
-	t_wallhit *wall_hit;
+	t_wallhit wall_hit;
 	int	counter = 0;
 	
 	rays_init(win);
@@ -432,19 +440,18 @@ void	player_render(t_win *win)
 		win->ray.ray_angle = win->ray.ray_temp;
 		win->ray.ray_angle = ray_correct(win->ray.ray_angle);
 		wall_hit = distance_getter(win, win->ray.ray_angle);
-		wall_hit->dist *= cos(win->playerA - win->ray.ray_angle);
-		win->ray.wall_height = (win->cell_size / wall_hit->dist) * 450;
+		wall_hit.dist *= cos(win->playerA - win->ray.ray_angle);
+		win->ray.wall_height = (win->cell_size / wall_hit.dist) * 450;
 		win->ray.wall_top = ((double)WIN_HEIGHT / 2) - (win->ray.wall_height / 2);
     	win->ray.wall_bottom = ((double)WIN_HEIGHT / 2) + (win->ray.wall_height / 2);
 		win->ray.wall_screen_x = win->ray.col;
-		wall_put(win, wall_hit);
+		wall_put(win, &wall_hit);
 		floor_ceil(win, 1);
 		floor_ceil(win, 0);
-		// my_mlx_draw_line(win->mlx_ptr, win->win_ptr, win->ray.wall_screen_x, win->ray.wall_top, win->ray.wall_bottom, win->img_ptr, win, wall_hit);
-		my_mlx_draw_line(win, wall_hit);
+		my_mlx_draw_line(win, &wall_hit);
 		win->ray.ray_temp += win->ray.ray_i;
 		win->ray.col++;
-		wall_hit->dist = -1;
+		wall_hit.dist = -1;
 		counter++;
 	}
 	map_draw(win);

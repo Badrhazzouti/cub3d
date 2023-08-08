@@ -6,7 +6,7 @@
 /*   By: bhazzout <bhazzout@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/08 22:12:42 by bhazzout          #+#    #+#             */
-/*   Updated: 2023/08/07 06:22:19 by bhazzout         ###   ########.fr       */
+/*   Updated: 2023/08/08 02:04:19 by bhazzout         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,19 @@ typedef struct s_sqr
 	int	m_y;
 	int	m_x;
 }	t_sqr;
+
+typedef	struct s_img
+{
+	int				x;
+	int				y;
+	unsigned int	*img;
+	unsigned int	*texture;
+	int				bits_per_pixel;
+	int				size_line;
+	int				endian;
+	int				img_index;
+	int				index;
+}	t_img;
 
 
 typedef struct	s_wallhit

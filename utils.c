@@ -6,7 +6,7 @@
 /*   By: bhazzout <bhazzout@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/09 00:01:54 by bhazzout          #+#    #+#             */
-/*   Updated: 2023/07/25 23:28:15 by bhazzout         ###   ########.fr       */
+/*   Updated: 2023/08/08 01:19:42 by bhazzout         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@ char	**map_getter(void)
 		counter++;
 	}
 	map = ft_split(map_line, '\n');
+	free(map_line);
 	// map_printer(map);
 	return (map);
 }
