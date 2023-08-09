@@ -6,7 +6,7 @@
 /*   By: bhazzout <bhazzout@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/09 00:01:54 by bhazzout          #+#    #+#             */
-/*   Updated: 2023/08/08 01:19:42 by bhazzout         ###   ########.fr       */
+/*   Updated: 2023/08/09 01:34:53 by bhazzout         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,11 +14,10 @@
 
 char	**map_getter(void)
 {
-	int 	fd;
+	in		fd;
 	char	*line;
 	int		counter;
 	char	*map_line;
-	// char	*line2;
 	char	**map;
 
 	fd = open("map.cub", O_RDONLY);
@@ -32,13 +31,12 @@ char	**map_getter(void)
 	{
 		line = get_next_line(fd);
 		if (!line)
-			break;
+			break ;
 		map_line = ft_strjoin(map_line, line);
 		free(line);
 		counter++;
 	}
 	map = ft_split(map_line, '\n');
 	free(map_line);
-	// map_printer(map);
 	return (map);
 }

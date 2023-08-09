@@ -6,7 +6,7 @@
 /*   By: bhazzout <bhazzout@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/09 00:34:17 by bhazzout          #+#    #+#             */
-/*   Updated: 2023/08/09 00:34:28 by bhazzout         ###   ########.fr       */
+/*   Updated: 2023/08/09 01:35:16 by bhazzout         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,7 @@ void	ray_draw(t_win *win, t_mini	*m_map)
 				ray_sqr.m_y += ray_sqr.j;
 			}
 		}
-		mini_pixel_to_img(win, ray_sqr.x, ray_sqr.y , 0x00FF00);
+		mini_pixel_to_img(win, ray_sqr.x, ray_sqr.y, 0x00FF00);
 		ray_sqr.x += ray_sqr.co;
 		ray_sqr.y += ray_sqr.si;
 		ray_sqr.i += 1;
