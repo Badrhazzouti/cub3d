@@ -6,7 +6,7 @@
 /*   By: bhazzout <bhazzout@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/09 00:34:17 by bhazzout          #+#    #+#             */
-/*   Updated: 2023/08/09 01:35:16 by bhazzout         ###   ########.fr       */
+/*   Updated: 2023/08/09 03:46:35 by bhazzout         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,7 +112,7 @@ void	map_draw(t_win *win)
 	while (y < win->map_height)
 	{
 		x = 0;
-		while (x < win->map_width)
+		while (x < (int)ft_strlen(win->map[y]))
 		{
 			if (win->map[y][x] == '1')
 				color = 0x000000;

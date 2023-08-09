@@ -6,7 +6,7 @@
 /*   By: bhazzout <bhazzout@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/08 22:12:33 by bhazzout          #+#    #+#             */
-/*   Updated: 2023/08/09 01:05:48 by bhazzout         ###   ########.fr       */
+/*   Updated: 2023/08/09 03:33:20 by bhazzout         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,16 @@ int	windows_close(int keycode, void *param)
 	exit (0);
 }
 
+void	map_printer(char **map)
+{
+	int	i = 0;
+	while (map[i])
+	{
+		printf("%s\n", map[i]);
+		i++;
+	}
+}
+
 int main (int ac, char **av)
 {
 	(void) av, (void) ac;
@@ -27,13 +37,13 @@ int main (int ac, char **av)
 	int	w;
 	int	h;
 	win.cell_size = 32;
-	win.map_height = 11;
+	win.map_height = 33;
 	win.map_width = 25;
-	win.playerx = 4.5 * 32;
-	win.playery = 4.5 * 32;
+	win.playerx = 9.5 * 32;
+	win.playery = 7.5 * 32;
 	win.mini_x = 4.5 * 32;
 	win.mini_y = 4.5 * 32;
-	win.player_a = M_PI / 2;
+	win.player_a = 3 * M_PI / 2;
 	win.fov_a = (M_PI / 3);
 	win.rays_a = WIN_WIDTH;
 	win.num_rays = WIN_WIDTH;

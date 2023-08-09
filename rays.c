@@ -6,7 +6,7 @@
 /*   By: bhazzout <bhazzout@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/09 00:36:31 by bhazzout          #+#    #+#             */
-/*   Updated: 2023/08/09 01:34:25 by bhazzout         ###   ########.fr       */
+/*   Updated: 2023/08/09 03:35:14 by bhazzout         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,6 +55,7 @@ void	floor_ceil(t_win *win, int flag)
 	while (y1 < y2)
 	{
 		pixel_to_img(win, x1, y1);
+		// mlx_pixel_put(win->mlx_ptr, win->win_ptr, x1, y1, 0xFF00F0);
 		y1++;
 	}
 }

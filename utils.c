@@ -6,7 +6,7 @@
 /*   By: bhazzout <bhazzout@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/09 00:01:54 by bhazzout          #+#    #+#             */
-/*   Updated: 2023/08/09 01:34:53 by bhazzout         ###   ########.fr       */
+/*   Updated: 2023/08/09 01:38:48 by bhazzout         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 char	**map_getter(void)
 {
-	in		fd;
+	int		fd;
 	char	*line;
 	int		counter;
 	char	*map_line;
