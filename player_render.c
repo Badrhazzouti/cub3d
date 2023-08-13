@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   player_render.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bhazzout <bhazzout@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ikhabour <ikhabour@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/09 00:34:17 by bhazzout          #+#    #+#             */
-/*   Updated: 2023/08/09 03:46:35 by bhazzout         ###   ########.fr       */
+/*   Updated: 2023/08/09 21:58:58 by ikhabour         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,10 +25,11 @@ void	player_render(t_win *win)
 		floor_ceil(win, 0);
 		my_mlx_draw_line(win, &wall_hit);
 		win->ray.ray_temp += win->ray.ray_i;
-		win->ray.col++;
+		win->ray.col--;
 		wall_hit.dist = -1;
 	}
-	map_draw(win);
+	if (BONUS)
+		map_draw(win);
 	mlx_put_image_to_window(win->mlx_ptr, win->win_ptr, win->img_ptr, 0, 0);
 }
 
@@ -116,7 +117,7 @@ void	map_draw(t_win *win)
 		{
 			if (win->map[y][x] == '1')
 				color = 0x000000;
-			else if (win->map[y][x] == '0')
+			else
 				color = 0xFFF0FF;
 			m_map.pixel_x = m_map.cell_x * x;
 			m_map.pixel_y = m_map.cell_y * y;

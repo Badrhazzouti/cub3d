@@ -3,109 +3,110 @@
 /*                                                        :::      ::::::::   */
 /*   ft_split.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bhazzout <bhazzout@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ikhabour <ikhabour@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/07/25 23:21:57 by bhazzout          #+#    #+#             */
-/*   Updated: 2023/08/09 01:34:11 by bhazzout         ###   ########.fr       */
+/*   Created: 2023/08/08 22:56:45 by ikhabour          #+#    #+#             */
+/*   Updated: 2023/08/09 01:50:59 by ikhabour         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "cub3d.h"
 
-int	calc_words(const char *s, char c)
+static	int	ft_len(const char *s, char c)
 {
-	int		i;
-	int		word;
+	int	i;
+	int	j;
 
 	i = 0;
-	word = 0;
-	while (s[i] == c && s[i])
-	i++;
-	while (s[i])
-	{
-		while (s[i] == c)
-			i++;
-		if (s[i])
-			word++;
-		while (s[i] != c && s[i])
-			i++;
-	}
-	return (word);
-}
-
-int	ft_wordlen(const char *s, int i, char c)
-{
-	int	len;
-
-	len = 0;
-	while (s[i] && s[i] != c)
-	{
-		i++;
-		len++;
-	}
-	return (len);
-}
-
-char	*ft_charge(const char *s, int i, char c)
-{
-	char	*str;
-	int		len;
-	int		j;
-
-	len = ft_wordlen(s, i, c) + 1;
-	str = (char *)malloc(sizeof(char) * len);
-	if (!str)
-		return (NULL);
 	j = 0;
-	while (s[i] && s[i] != c)
+	while (s[i] == c && s[i])
+		i++;
+	while (s[i] != c && s[i])
 	{
-		str[j] = s[i];
 		i++;
 		j++;
 	}
-	str[j] = '\0';
-	return (str);
+	return (j);
 }
 
-void	*freeini(char **string, int len)
+static	char	*my_strdup(const char *s, char c)
 {
-	int	i;
+	char	*pointer;
+	size_t	i;
+	size_t	j;
 
 	i = 0;
-	while (i < len)
-	{
-		free(string[i]);
+	j = 0;
+	pointer = malloc(ft_len(s, c) * sizeof(char) + 1);
+	if (!pointer)
+		return (NULL);
+	while (s[i] == c && s[i])
 		i++;
+	while (s[i] != c && s[i])
+	{
+		pointer[j] = s[i];
+		i++;
+		j++;
 	}
-	free(string);
-	return (NULL);
+	pointer[j] = '\0';
+	return (pointer);
 }
 
-char	**ft_split(const char *s, char sep)
+static	int	stringcount(const char *s, char c)
 {
-	char	**strs;
+	int	i;
+	int	j;
+
+	i = 0;
+	j = 0;
+	while (s[i])
+	{
+		while (s[i] == c && s[i])
+			i++;
+		if (s[i])
+			j++;
+		while (s[i] != c && s[i])
+			i++;
+	}
+	return (j);
+}
+
+static	void	ft_free(char **str, int j)
+{
+	while (str[j])
+	{
+		free (str[j]);
+		j--;
+	}
+	free (str);
+	return ;
+}
+
+char	**ft_split(const char *s, char c)
+{
 	int		i;
 	int		j;
+	char	**str;
 
 	if (!s)
 		return (0);
-	strs = (char **)ft_calloc(sizeof(char *), (calc_words(s, sep) + 1));
-	if (!strs || !s)
-		return (NULL);
 	i = 0;
 	j = 0;
-	while (s[i] && j < calc_words(s, sep))
+	str = malloc((stringcount(s, c) + 1) * sizeof(char *));
+	if (!str)
+		return (0);
+	while (s[i])
 	{
-		while (s[i] && s[i] == sep)
+		while (s[i] == c && s[i])
 			i++;
-		if (s[i])
-		{
-			strs[j++] = ft_charge(s, i++, sep);
-			if (!strs[j - 1])
-				return (freeini(strs, --j));
-		}
-		while (s[i] && s[i] != sep)
+		if (s[i] == 0)
+			break ;
+		str[j] = my_strdup(s + i, c);
+		if (!str[j])
+			ft_free(str, j);
+		j++;
+		while (s[i] != c && s[i])
 			i++;
 	}
-	return (strs);
+	return (str[j] = 0, str);
 }

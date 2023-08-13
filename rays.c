@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   rays.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bhazzout <bhazzout@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ikhabour <ikhabour@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/09 00:36:31 by bhazzout          #+#    #+#             */
-/*   Updated: 2023/08/09 03:35:14 by bhazzout         ###   ########.fr       */
+/*   Updated: 2023/08/09 05:51:13 by ikhabour         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,18 +44,17 @@ void	floor_ceil(t_win *win, int flag)
 	{	
 		y1 = 0;
 		y2 = win->ray.wall_top;
-		win->color = 0x0F00FF;
+		win->color = win->floor;
 	}
 	else
 	{
 		y1 = win->ray.wall_bottom;
 		y2 = WIN_HEIGHT;
-		win->color = 0xFF00F0;
+		win->color = win->ceiling;
 	}
 	while (y1 < y2)
 	{
 		pixel_to_img(win, x1, y1);
-		// mlx_pixel_put(win->mlx_ptr, win->win_ptr, x1, y1, 0xFF00F0);
 		y1++;
 	}
 }
@@ -69,7 +68,7 @@ void	rays_init(t_win *win)
 	win->ray.ray_temp = win->ray.ray_start;
 	win->img_ptr = NULL;
 	win->ray.wall_height = 0;
-	win->ray.col = 0;
+	win->ray.col = WIN_WIDTH;
 	win->ray.wall_screen_x = 0;
 	win->img_ptr && mlx_destroy_image(win->mlx_ptr, win->img_ptr);
 	win->img_ptr = mlx_new_image(win->mlx_ptr, WIN_WIDTH, WIN_HEIGHT);

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   update.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: bhazzout <bhazzout@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ikhabour <ikhabour@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/08/09 00:28:47 by bhazzout          #+#    #+#             */
-/*   Updated: 2023/08/09 01:34:28 by bhazzout         ###   ########.fr       */
+/*   Updated: 2023/08/09 21:56:28 by ikhabour         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,14 +49,14 @@ void	move_update(t_win *win, double playerdx, double playerdy)
 	}
 	if (win->mv.move_left == 0)
 	{
-		playerdx = cos(-win->player_a + M_PI_2);
-		playerdy = sin(-win->player_a + M_PI_2);
+		playerdx = cos(-win->player_a - M_PI_2);
+		playerdy = sin(-win->player_a - M_PI_2);
 		x_y_update(win, playerdx, playerdy);
 	}
 	if (win->mv.move_right == 0)
 	{
-		playerdx = cos(-win->player_a - M_PI_2);
-		playerdy = sin(-win->player_a - M_PI_2);
+		playerdx = cos(-win->player_a + M_PI_2);
+		playerdy = sin(-win->player_a + M_PI_2);
 		x_y_update(win, playerdx, playerdy);
 	}
 }
@@ -70,12 +70,12 @@ int	p_update(t_win *win)
 	playerdy = 0;
 	if (win->mv.rotate_left == 0)
 	{
-		win->player_a -= 0.1;
+		win->player_a += 0.1;
 		ray_correct(win->player_a);
 	}
 	if (win->mv.rotate_right == 0)
 	{
-		win->player_a += 0.1;
+		win->player_a -= 0.1;
 		ray_correct(win->player_a);
 	}
 	move_update(win, playerdx, playerdy);
